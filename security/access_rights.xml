@@ -1,0 +1,26 @@
+<odoo>
+    <data noupdate="0">
+        <!-- Define the security group category -->
+        <record model="ir.module.category" id="module_category_stream_cash">
+            <field name="name">StreamCash</field>
+            <field name="sequence">61</field>
+            <field name="visible" eval="0"/>
+        </record>     
+
+        <!-- Define user groups with the above category -->
+        <record id="group_streamcash_cashiers" model="res.groups">
+            <field name="name">Cashier</field>
+            <field name="category_id" ref="module_category_stream_cash"/>
+        </record>
+
+        <record id="group_streamcash_supervisor" model="res.groups">
+            <field name="name">Supervisor</field>
+            <field name="category_id" ref="module_category_stream_cash"/>
+        </record>
+
+        <record id="group_streamcash_manager" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="category_id" ref="module_category_stream_cash"/>
+        </record>
+    </data>
+</odoo>

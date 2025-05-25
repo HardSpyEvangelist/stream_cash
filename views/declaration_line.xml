@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="stream_cash_declaration_line_form_view" model="ir.ui.view">
+            <field name="name">stream_cash.declaration.line.form</field>
+            <field name="model">stream_cash.declaration.line</field>
+            <field name="arch" type="xml">
+                <form string="Declaration Line" create="0" edit="0" delete="0">
+                        <field name="declaration_line_ids" readonly="1">
+                            <list>
+                                    <field name="partner_id" width="80px" column_invisible="parent.declaration_type not in ['Credit Note','Accounts']"/>
+                                    <field name="transaction_type_id" width="80px" column_invisible="parent.declaration_type in ['Cash']" domain="[('declaration_type_id.name', '=', parent.declaration_type)]"/>
+                                    <field name="denomination_name" readonly="1" width="80px" column_invisible="parent.declaration_type != 'Cash'"/>
+                                    <field name="denomination_value" force_save="1" readonly="1" column_invisible="parent.declaration_type != 'Cash'"/>
+                                    <field name="count" column_invisible="parent.declaration_type != 'Cash'"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="amount" readonly="1" options="{'currency_field': 'currency_id'}"/>
+                                    <field name="exchange_rate" readonly="1"/>
+                                    <field name="currency_usd" column_invisible="1"/>
+                                    <field name="amount_usd" readonly="1" options="{'currency_field': 'currency_usd'}" sum="total"/>
+                            </list>
+                        </field>
+                </form>
+            </field>
+        </record>
+
+        <record id="stream_cash_declaration_line_list_view" model="ir.ui.view">
+            <field name="name">stream_cash.declaration.line.list</field>
+            <field name="model">stream_cash.declaration.line</field>
+            <field name="arch" type="xml">
+                <list string="Declaration Line">
+                    <field name="declaration_id"/>
+                    <field name="denomination_id"/>
+                    <field name="declaration_type"/>
+                    <field name="currency_id"/>
+                    <field name="currency_usd"/>
+                    <field name="exchange_rate"/>
+                    <field name="amount_usd"/>
+                </list>
+            </field>
+        </record>
+
+<!--        <record id="stream_cash_declaration_line_search_view" model="ir.ui.view">-->
+<!--            <field name="name">stream_cash.declaration.line.search</field>-->
+<!--            <field name="model">stream_cash.declaration.line</field>-->
+<!--            <field name="arch" type="xml">-->
+<!--                <search string="Declaration Line">-->
+<!--                    <group expand="1" string="Group By">-->
+<!--                        <filter string="Example Field" name="example_field" domain="[]"-->
+<!--                                context="{'group_by':'example_field'}"/>-->
+<!--                    </group>-->
+<!--                </search>-->
+<!--            </field>-->
+<!--        </record>-->
+
+        <record id="stream_cash_declaration_line_act_window" model="ir.actions.act_window">
+            <field name="name">Declaration Line</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">stream_cash.declaration.line</field>
+            <field name="view_mode">list,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Experience effortless management of Declaration Line.
+                </p>
+                <p>
+                    Click 'New' to add a new record and streamline your workflow.
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

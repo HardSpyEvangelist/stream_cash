@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="stream_cash_declarations_notes_line_form_view" model="ir.ui.view">
+            <field name="name">stream_cash_declarations_notes.line.form</field>
+            <field name="model">stream_cash_declarations_notes.line</field>
+            <field name="arch" type="xml">
+                <form string="Declarations Notes">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="denomination_value"/>
+                                <field name="denomination_name"/>
+                                <field name="denomination_id"/>
+                                <field name="transaction_type_id" domain="[('declaration_type_id.name', '=', parent.declaration_type)]"/>
+                                <!-- <field name="partner_id" attrs="{'invisible': [('parent.declaration_type', 'not in', ['Credit Note', 'Accounts'])]}"/> -->
+                            </group>
+                            <group>
+                                <field name="company_id" invisible="1"/>
+                                <field name="amount"/>
+                                <field name="amount_usd"/>
+                                <field name="currency_usd" invisible="1"/>
+                                <field name="exchange_rate"/>
+                                <field name="currency_id"/>
+                                <field name="create_date"/>
+                                <field name="count"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="stream_cash_declarations_notes_line_list_view" model="ir.ui.view">
+            <field name="name">stream_cash_declarations_notes.line.list</field>
+            <field name="model">stream_cash_declarations_notes.line</field>
+            <field name="arch" type="xml">
+                <list string="Declarations Notes Lines">
+                    <field name="denomination_value"/>
+                    <field name="denomination_name"/>
+                    <field name="denomination_id"/>
+                    <field name="transaction_type_id"/>
+                    <field name="partner_id"/>
+                    <field name="company_id"/>
+                    <field name="amount"/>
+                    <field name="amount_usd"/>
+                    <field name="currency_usd"/>
+                    <field name="exchange_rate"/>
+                    <field name="currency_id"/>
+                    <field name="create_date"/>
+                    <field name="count"/>
+                </list>
+            </field>
+        </record>
+
+<!--        <record id="stream_cash_declarations_notes_line_search_view" model="ir.ui.view">-->
+<!--            <field name="name">stream_cash_declarations_notes.line.search</field>-->
+<!--            <field name="model">stream_cash_declarations_notes.line</field>-->
+<!--            <field name="arch" type="xml">-->
+<!--                <search string="Declarations Notes Lines">-->
+<!--                    <group expand="1" string="Group By">-->
+<!--                        <filter string="Example Field" name="example_field" domain="[]"-->
+<!--                                context="{'group_by':'example_field'}"/>-->
+<!--                    </group>-->
+<!--                </search>-->
+<!--            </field>-->
+<!--        </record>-->
+
+        <record id="stream_cash_declarations_notes_line_act_window" model="ir.actions.act_window">
+            <field name="name">Declarations Notes Lines</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">stream_cash_declarations_notes.line</field>
+            <field name="view_mode">list,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Experience effortless management of Declarations Notes Lines.
+                </p>
+                <p>
+                    Click 'New' to add a new record and streamline your workflow.
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Main menu for Stream Cash app -->
+    <menuitem id="stream_cash_menu_root"
+              name="Stream CashUp"
+              web_icon="stream_cash,static/description/icon.png"/>
+
+    <!-- Configuration menu structure -->
+    <menuitem id="menu_stream_cash_configuration"
+              name="Configurations"
+              parent="stream_cash_menu_root"
+              sequence="20"/>
+
+    <!-- Existing currency menu -->
+    <menuitem id="menu_stream_cash_currency"
+              name="Currencies"
+              parent="menu_stream_cash_configuration"
+              action="base.action_currency_form"
+              sequence="10"/>
+
+    <!-- Staff menu linked to HR's employee list -->
+    <menuitem id="menu_stream_cash_staff"
+              name="Staff"
+              parent="menu_stream_cash_configuration"
+              action="hr.open_view_employee_list_my"
+              sequence="30"/>
+
+    
+</odoo>

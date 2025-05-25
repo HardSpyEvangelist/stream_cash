@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Inherit existing currency form view to add denominations tab -->
+    <record id="view_currency_form_inherit" model="ir.ui.view">
+        <field name="name">res.currency.form.inherit</field>
+        <field name="model">res.currency</field>
+        <field name="inherit_id" ref="base.view_currency_form"/>
+        <field name="arch" type="xml">
+            
+            <xpath expr="//notebook" position="replace">
+                    <notebook class="o_currency_rate_list">
+                        <page string="Rates" name="rates"  invisible="is_current_company_currency">
+                            <field name="rate_ids" widget="one2many">
+                                <list string="Rates"  editable="top" limit="25">
+                                    <field name="name"/>
+                                    <field name="company_id" groups="base.group_multi_company"/>
+                                    <field name="company_rate" digits="[12,12]"/>
+                                    <field name="inverse_company_rate" digits="[12,12]"/>
+                                    <field name="rate" digits="[12,12]" optional="hide"/>
+                                    <field name="write_date" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Denominations">
+                    <field name="denomination_ids" nolabel="1">
+                        <list editable="bottom">
+                            <field name="name"/>
+                            <field name="value"/>
+                            <field name="active"/>
+                        </list>
+                    </field>
+                </page>
+                        </notebook>
+               
+            </xpath>
+        </field>
+    </record>
+</odoo>

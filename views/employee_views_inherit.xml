@@ -1,0 +1,18 @@
+<odoo>
+    <record id="view_employee_form_inherit_stream_cash" model="ir.ui.view">
+        <field name="name">hr.employee.form.inherit.stream_cash</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/> <!-- Adjust if you're targeting a custom view -->
+        <field name="arch" type="xml">
+            <!-- Add employee_number after work_email -->
+            <xpath expr="//field[@name='work_email']" position="after">
+                <field name="employee_number"/>
+            </xpath>
+
+            <!-- Add cashier_number after department -->
+            <xpath expr="//field[@name='department_id']" position="after">
+                <field name="employee_cashier_number" string="Cashier Number"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- List View with State Field and Decorations -->
+    <record id="view_declarations_list" model="ir.ui.view">
+        <field name="name">stream_cash.declarations.list</field>
+        <field name="model">stream_cash.declarations</field>
+        <field name="arch" type="xml">
+            <list string="Declarations">
+                <!-- Status shown first with color decoration -->
+                <field name="state"
+                       decoration-info="state == 'Draft'"
+                       decoration-warning="state == 'Verified'"
+                       decoration-success="state == 'Closed'"/>
+                <field name="date"/>
+                <field name="cashier_number" width="150px"/>
+                <field name="cashier_name" width="150px"/>
+                <field name="cashup_z_reading" width="150px"/>
+                <field name="total" string="Actual Day's Total" width="150px"/>
+                <field name="variance" decoration-danger="variance != 0" decoration-muted="variance == 0"/>
+                <field name="cash_excl_floats" width="180px"/>
+                <field name="vouchers_issued" width="150px"/>
+                <field name="vouchers_redeemed" width="150px"/>
+                <field name="accounts" width="150px"/>
+                <field name="credit_notes" width="150px"/>
+                <field name="usd_eft" width="150px"/>
+                <field name="usd_offline" width="150px"/>
+                <field name="zig_eft" width="150px"/>
+                <field name="zig_offline" width="150px"/>
+                <field name="zar_eft" width="150px"/>
+                <field name="zar_offline" width="150px"/>
+                <field name="total_cards_total" width="150px"/>
+                <field name="pickups_cash" width="150px"/>
+                <field name="total" width="150px"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Valid Search View with Filters and Group By -->
+  <record id="view_declarations_search" model="ir.ui.view">
+    <field name="name">stream_cash.declarations.search</field>
+    <field name="model">stream_cash.declarations</field>
+    <field name="arch" type="xml">
+        <search string="Search Declarations">
+            <!-- ONLY filters allowed in older Odoo versions -->
+            <filter name="filter_draft" string="Draft" domain="[('state','=','Draft')]"/>
+            <filter name="filter_verified" string="Verified" domain="[('state','=','Verified')]"/>
+            <filter name="filter_closed" string="Closed" domain="[('state','=','Closed')]"/>
+
+            <separator/>
+
+            <group expand="0" string="Group By">
+                <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                <filter name="group_cashier" string="Cashier" context="{'group_by': 'cashier_name'}"/>
+            </group>
+        </search>
+    </field>
+</record>
+
+
+    <!-- Form View -->
+    <record id="view_declarations_form" model="ir.ui.view">
+        <field name="name">stream_cash.declarations.form</field>
+        <field name="model">stream_cash.declarations</field>
+        <field name="arch" type="xml">
+            <form string="Declarations">
+                <header>
+                    <button name="action_open_type_selector"
+                            string="Add Declaration Line"
+                            type="object"
+                            class="btn-primary"
+                            context="{'default_declaration_id': id}"
+                            invisible="state != 'Draft'"/>
+                    <button name="action_verify"
+                            string="Verify"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'Draft'"
+                            groups="stream_cash.group_streamcash_supervisor"/>
+                    <button name="action_close"
+                            string="Close"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'Verified'"
+                            groups="stream_cash.group_streamcash_manager"/>
+                    <button name="action_reset_to_draft"
+                            string="Reset to Draft"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state == 'Draft'"
+                            groups="stream_cash.group_streamcash_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="Draft,Verified,Closed"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="cashier_name"/>
+                            <field name="cashier_number"/>
+                        </group>
+                        <group>
+                            <field name="total"/>
+                            <field name="cashup_z_reading"/>
+                            <field name="variance" decoration-danger="variance != 0" decoration-muted="variance == 0"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="supervisor_name"/>
+                        <field name="manager_name"/>
+                    </group>
+                    <group>
+                        <field name="wrong_tenders_or_comments"/>
+                    </group>
+                    <notebook>
+                        <page string="Declarations">
+                            <field name="declaration_lines" nolabel="1" readonly="1">
+                                <list editable="top">
+                                    <field name="declaration_type_ids"/>
+                                    <field name="currency_id"/>
+                                    <field name="amount" options="{'currency_field': 'currency_id'}"/>
+                                    <field name="exchange_rate"/>
+                                    <field name="currency_usd" column_invisible="1"/>
+                                    <button name="action_open_declaration_lines_notes"
+                                            string="View Details"
+                                            type="object"
+                                            class="btn-secondary"
+                                            context="{'default_declaration_notes_lines_id': id}"/>
+                                    <field name="amount_usd" options="{'currency_field': 'currency_usd'}" sum="total"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action Using the Custom Search View -->
+    <record id="action_declarations" model="ir.actions.act_window">
+        <field name="name">Declarations</field>
+        <field name="res_model">stream_cash.declarations</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_declarations_search"/>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="stream_cash_menu_root"
+              name="Stream CashUp"
+              sequence="10"/>
+    <menuitem id="menu_declarations_cash_app"
+              name="Declarations"
+              parent="stream_cash_menu_root"
+              action="action_declarations"/>
+
+    <!-- Bulk Close Server Action -->
+    <record id="action_bulk_close_declarations" model="ir.actions.server">
+        <field name="name">Bulk Close Declarations</field>
+        <field name="model_id" ref="model_stream_cash_declarations"/>
+        <field name="binding_model_id" ref="model_stream_cash_declarations"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+            env['stream_cash.declarations'].browse(env.context.get('active_ids')).action_bulk_close()
+        </field>
+    </record>
+
+    
+
+</odoo>
