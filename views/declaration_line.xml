@@ -10,8 +10,10 @@
                         <field name="declaration_line_ids" readonly="1">
                             <list>
                                    <field name="partner_id" width="80px" column_invisible="not parent.related_is_partner"/>
-                                    <field name="transaction_type_id" width="80px"column_invisible="parent.related_is_cash or parent.related_is_partner"
-                                        domain="[('declaration_type_id.name', '=', parent.declaration_type)]"/>
+                                    <field name="transaction_type_id"
+                                            width="80"
+                                            column_invisible="parent.related_is_cash or parent.related_is_partner"
+                                            domain="[('declaration_type_id.name', '=', parent.declaration_type)]"/>
                                     <field name="denomination_name" readonly="1" width="80px" column_invisible="not parent.related_is_cash"/>
                                     <field name="denomination_value" force_save="1" readonly="1" column_invisible="not parent.related_is_cash"/>
                                     <field name="count" column_invisible="not parent.related_is_cash"/>        

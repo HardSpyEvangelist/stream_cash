@@ -32,6 +32,8 @@
                 <field name="zar_offline" width="150px"/>
                 <field name="total_cards_total" width="150px"/>
                 <field name="pickups_cash" width="150px"/>
+                <field name= "payment_out" width="150px"/>
+                <!-- <field name= "other_declarations_total"/> -->
                 <field name="total" width="150px"/>
             </list>
         </field>
