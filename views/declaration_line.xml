@@ -9,11 +9,12 @@
                 <form string="Declaration Line" create="0" edit="0" delete="0">
                         <field name="declaration_line_ids" readonly="1">
                             <list>
-                                    <field name="partner_id" width="80px" column_invisible="parent.declaration_type not in ['Credit Note','Accounts']"/>
-                                    <field name="transaction_type_id" width="80px" column_invisible="parent.declaration_type in ['Cash']" domain="[('declaration_type_id.name', '=', parent.declaration_type)]"/>
-                                    <field name="denomination_name" readonly="1" width="80px" column_invisible="parent.declaration_type != 'Cash'"/>
-                                    <field name="denomination_value" force_save="1" readonly="1" column_invisible="parent.declaration_type != 'Cash'"/>
-                                    <field name="count" column_invisible="parent.declaration_type != 'Cash'"/>
+                                   <field name="partner_id" width="80px" column_invisible="not parent.related_is_partner"/>
+                                    <field name="transaction_type_id" width="80px"column_invisible="parent.related_is_cash or parent.related_is_partner"
+                                        domain="[('declaration_type_id.name', '=', parent.declaration_type)]"/>
+                                    <field name="denomination_name" readonly="1" width="80px" column_invisible="not parent.related_is_cash"/>
+                                    <field name="denomination_value" force_save="1" readonly="1" column_invisible="not parent.related_is_cash"/>
+                                    <field name="count" column_invisible="not parent.related_is_cash"/>        
                                     <field name="currency_id" column_invisible="1"/>
                                     <field name="amount" readonly="1" options="{'currency_field': 'currency_id'}"/>
                                     <field name="exchange_rate" readonly="1"/>

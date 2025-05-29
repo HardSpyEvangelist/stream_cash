@@ -18,6 +18,11 @@ class StreamCashDeclarationLine(models.Model):
     amount_usd = fields.Monetary(string="Amount (USD)", compute='_compute_amount_usd', store=True)
     denomination_id = fields.Many2one('currency.denomination', string='Denomination')
 
+    related_is_cash = fields.Boolean(related='declaration_type_ids.is_cash', store=True)
+    related_is_partner = fields.Boolean(related='declaration_type_ids.is_partner', store=True)
+    related_is_negate = fields.Boolean(related='declaration_type_ids.is_negate', store=True)
+
+
     @api.depends('amount', 'currency_id')
     def _compute_amount_usd(self):
         for record in self:
