@@ -21,9 +21,14 @@ class CashDeclarationWizardLine(models.TransientModel):
 
     # New transaction type field
     transaction_type_id = fields.Many2one('transaction.type', string="Transaction Type")
+
+    
     
     # credit notes fields
     partner_id = fields.Many2one('res.partner', string='Account Name')
+    
+    
+    
 
     @api.depends('count', 'wizard_id', 'amount')
     def _compute_amount_usd(self):
@@ -46,5 +51,8 @@ class CashDeclarationWizardLine(models.TransientModel):
     @api.onchange('count')
     def _onchange_count(self):
         for line in self:
-            if line.wizard_id.declaration_type and line.wizard_id.declaration_type == 'Cash':
+            if line.wizard_id.related_is_cash:
                 line.amount = line.count * line.denomination_value
+
+
+    

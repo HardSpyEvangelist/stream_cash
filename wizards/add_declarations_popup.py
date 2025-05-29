@@ -12,16 +12,24 @@ class CashDeclarationWizard(models.TransientModel):
     currency_id = fields.Many2one('res.currency', string="Currency", required=True)
     line_ids = fields.One2many('add_declarations_popup_wizard.line', 'wizard_id', string="Lines")
 
+    related_is_partner = fields.Boolean(related='declaration_type_ids.is_partner', store=True)
+    related_is_cash = fields.Boolean(related='declaration_type_ids.is_cash', store=True)
+    related_is_negate = fields.Boolean(related='declaration_type_ids.is_negate', store=True)
+
+
+    
+    
+
     
     total_amount = fields.Float(string="Total Amount", compute="_compute_total_amount", store=True)
     total_amount_usd = fields.Float(string="Total Amount (USD)", store=True)
 
-    @api.onchange('currency_id','declaration_type_ids')
+   
+    @api.onchange('currency_id', 'declaration_type_ids')
     def _onchange_currency_id(self):
         if self.currency_id:
-            self.line_ids = [(5, 0, 0)]
-            # Clear lines
-            if self.declaration_type=='Cash':
+            self.line_ids = [(5, 0, 0)]  # Clear existing lines
+            if self.related_is_cash:
                 denominations = self.env['currency.denomination'].search([
                     ('currency_id', '=', self.currency_id.id),
                     ('active', '=', True)
@@ -41,10 +49,13 @@ class CashDeclarationWizard(models.TransientModel):
 
         for rec in self.line_ids:
             line_note = {}  # Always define fresh
-            if rec.wizard_id.declaration_type == 'Cash':
+
+            amount = -rec.amount if self.related_is_negate else rec.amount  #  Apply negate logic
+
+            if rec.wizard_id.related_is_cash:
                 if rec.count > 0:
                     line_note = {
-                        'amount': rec.amount,
+                        'amount': amount,  #  Store the possibly negative amount
                         'currency_id': rec.currency_id.id,
                         'count': rec.count,
                         'denomination_id': rec.denomination_id.id,
@@ -52,10 +63,10 @@ class CashDeclarationWizard(models.TransientModel):
                         'partner_id': rec.partner_id.id if rec.partner_id else False,
                     }
                     declaration_notes.append((0, 0, line_note))
-                    cash_amount += rec.amount
+                    cash_amount += amount  #  Add possibly negative amount
             else:
                 line_note = {
-                    'amount': rec.amount,
+                    'amount': amount,  #  Same for non-cash
                     'currency_id': rec.currency_id.id,
                     'count': rec.count,
                     'denomination_id': rec.denomination_id.id if rec.denomination_id else False,
@@ -63,7 +74,7 @@ class CashDeclarationWizard(models.TransientModel):
                     'partner_id': rec.partner_id.id if rec.partner_id else False,
                 }
                 declaration_notes.append((0, 0, line_note))
-                cash_amount += rec.amount
+                cash_amount += amount  #  Again, add possibly negative
 
         print(declaration_notes)
 

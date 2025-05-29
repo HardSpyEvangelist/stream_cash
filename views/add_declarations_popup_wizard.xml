@@ -10,6 +10,9 @@
                         <group>
                             <field name="declaration_type_ids" force_save="1"/>
                             <field name="declaration_type" invisible="1"/>
+                            <field name="related_is_partner" invisible="1"/>
+                            <field name="related_is_cash" invisible="1"/>
+                            <field name="related_is_negate" invisible="1"/>
                         </group>
                         <group>
                             <field name="currency_id" options="{'no_create': True, 'no_open': True}"/>
@@ -19,18 +22,18 @@
                         <page string="Declaration lines"  >
                              <field name="line_ids" nolabel="1">
                                 <list editable="bottom" delete="false" >
-                                    <field name="partner_id" width="80px"  force_save="1" column_invisible ="parent.declaration_type not in ['Credit Note','Accounts']"/>
+                                    <field name="partner_id" width="80px" force_save="1" column_invisible="parent.related_is_partner == False"/>
                                     <field name="transaction_type_id" width="120px" force_save="1" 
-                                            column_invisible="parent.declaration_type in ('Accounts', 'Credit Note', 'Cash')"
+                                            column_invisible="parent.related_is_cash == True or parent.related_is_partner == True"
                                             domain="[('declaration_type_id', '=', parent.declaration_type_ids)]"
                                             options="{'no_create': True, 'no_open': True}"/>
                                     <field name="denomination_id" force_save="1" readonly="1"  column_invisible="1"/>
-                                    <field name="denomination_name" width="80px"  force_save="1" readonly="1"  column_invisible ="parent.declaration_type != 'Cash'"/>
-                                    <field name="denomination_value"  force_save="1" readonly="1" column_invisible ="parent.declaration_type != 'Cash'"/>
-                                    <field name="count" force_save="1"  column_invisible ="parent.declaration_type != 'Cash'"/>
+                                    <field name="denomination_name" width="80px"  force_save="1" readonly="1"  column_invisible ="parent.related_is_cash == False"/>
+                                    <field name="denomination_value"  force_save="1" readonly="1" column_invisible ="parent.related_is_cash == False"/>
+                                    <field name="count" force_save="1"  column_invisible ="parent.related_is_cash == False"/>
                                     <field name="currency_id"  force_save="1" column_invisible="1"/>
                                     <field name="currency_usd"  force_save="1" column_invisible="1"/>
-                                    <field name="amount" readonly="parent.declaration_type == 'Cash'" force_save="1" options="{'currency_field': 'currency_id'}" sum="total"/>
+                                    <field name="amount" readonly="parent.related_is_cash == True" force_save="1" options="{'currency_field': 'currency_id'}" sum="total"/>
                                     <field name="exchange_rate"  force_save="1" readonly="1"/>
                                     <field name="amount_usd" readonly="1"  force_save="1" options="{'currency_field': 'currency_usd'} " sum="total"/>
                                 </list>

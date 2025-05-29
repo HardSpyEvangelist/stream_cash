@@ -17,7 +17,8 @@
                 <field name="cashier_name" width="150px"/>
                 <field name="cashup_z_reading" width="150px"/>
                 <field name="total" string="Actual Day's Total" width="150px"/>
-                <field name="variance" decoration-danger="variance != 0" decoration-muted="variance == 0"/>
+                <field name="variance" decoration-danger="variance != 0" decoration-muted="variance == 0"  width="150px"/>
+                <field name= "cash_floats" string="Floats" width="150px"/>
                 <field name="cash_excl_floats" width="180px"/>
                 <field name="vouchers_issued" width="150px"/>
                 <field name="vouchers_redeemed" width="150px"/>

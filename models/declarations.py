@@ -12,9 +12,11 @@ class StreamCashAppModel(models.Model):
     declaration_type_ids = fields.Many2one('declaration.type', string='Declaration Type', required=True)
     
     # Employee and Cashier Info
-    cashier_number = fields.Char(string="Cashier Number",related='cashier_name.employee_cashier_number',store=True)
+    
 
     cashier_name = fields.Many2one('hr.employee', string='Cashier')
+
+    cashier_number = fields.Char(string="Cashier Number",related='cashier_name.employee_cashier_number',store=True)
 
     # Supervisor and Manager Info
     supervisor_name = fields.Many2one('hr.employee', string="Supervisor")
@@ -32,6 +34,7 @@ class StreamCashAppModel(models.Model):
     cashup_z_reading = fields.Float(string="Cashup Z Reading")    #is also the x_report_reading
     #actual_day_total = fields.Float(string="ACTUAL DAY TOTAL")
     variance = fields.Float(string="Variance",compute='_compute_variance')
+    cash_floats = fields.Integer(compute='_compute_all_totals')
     cash_excl_floats = fields.Integer(compute='_compute_all_totals' , string='Cash Excl Floats (USD)')
     accounts = fields.Float(compute='_compute_all_totals',string='Accounts (USD)')
     credit_notes = fields.Float(compute='_compute_all_totals', string='Credit Notes (USD)')
@@ -85,6 +88,7 @@ class StreamCashAppModel(models.Model):
             # Totals by declaration type
             total = pickups_cash = accounts = credit_notes = 0.0
             cash_excl_floats = total_cards_total = vouchers_issued = vouchers_redeemed = 0.0
+            cash_floats = 0.0
 
             # Credit card sub-totals
             usd_eft = usd_offline = zig_eft = zig_offline = 0.0
@@ -103,6 +107,8 @@ class StreamCashAppModel(models.Model):
                     credit_notes += amount
                 elif dtype == 'Cash':
                     cash_excl_floats += amount
+                elif dtype == 'Floats':
+                    cash_floats += amount
                 elif dtype == 'Credit Card':
                     total_cards_total += amount
 
@@ -136,6 +142,7 @@ class StreamCashAppModel(models.Model):
             record.pickups_cash = pickups_cash
             record.accounts = accounts
             record.credit_notes = credit_notes
+            record.cash_floats = cash_floats
             record.cash_excl_floats = cash_excl_floats
             record.total_cards_total = total_cards_total
             record.vouchers_issued = vouchers_issued
