@@ -21,21 +21,21 @@ class StreamCashAppModel(models.Model):
     cashup_z_reading = fields.Float(string="Cashup Z Reading")
     variance = fields.Float(string="Variance", compute='_compute_variance')
 
-    cash_floats = fields.Integer(compute='_compute_all_totals')
-    cash_excl_floats = fields.Float(compute='_compute_all_totals', string='Cash Excl Floats (USD)')
-    accounts = fields.Float(compute='_compute_all_totals', string='Accounts (USD)')
-    credit_notes = fields.Float(compute='_compute_all_totals', string='Credit Notes (USD)')
+    cash_floats = fields.Integer(compute='_compute_all_totals', store=True)
+    cash_excl_floats = fields.Float(compute='_compute_all_totals', string='Cash Excl Floats (USD)', store=True)
+    accounts = fields.Float(compute='_compute_all_totals', string='Accounts (USD)', store=True)
+    credit_notes = fields.Float(compute='_compute_all_totals', string='Credit Notes (USD)', store=True)
     usd_eft = fields.Float(string="Eft - USD", compute="_compute_all_totals", store=True)
     usd_offline = fields.Float(string="Offline - USD", compute="_compute_all_totals", store=True)
     zig_eft = fields.Float(string="Eft - ZiG", compute="_compute_all_totals", store=True)
     zig_offline = fields.Float(string="Offline ZiG", compute="_compute_all_totals", store=True)
     zar_eft = fields.Float(string="Eft - ZAR", compute="_compute_all_totals", store=True)
     zar_offline = fields.Float(string="Offline - ZAR", compute="_compute_all_totals", store=True)
-    total_cards_total = fields.Float(compute='_compute_all_totals', string="Total Cards Total")
+    total_cards_total = fields.Float(compute='_compute_all_totals', string="Total Cards Total", store=True)
     vouchers_issued = fields.Float(string="Vouchers Issued", compute="_compute_all_totals", store=True)
     vouchers_redeemed = fields.Float(string="Vouchers Redeemed", compute="_compute_all_totals", store=True)
-    pickups_cash = fields.Float(compute='_compute_all_totals', string="Pickup Cash (USD)")
-    payment_out = fields.Integer(compute='_compute_all_totals')
+    pickups_cash = fields.Float(compute='_compute_all_totals', string="Pickup Cash (USD)", store=True)
+    payment_out = fields.Integer(compute='_compute_all_totals', store=True)
     total = fields.Float(string="Total (USD)", compute="_compute_all_totals", store=True)
     other_declarations_total = fields.Float(string="Other Declarations Total", compute="_compute_all_totals", store=True)
 
@@ -100,8 +100,15 @@ class StreamCashAppModel(models.Model):
                         payment_out += amount
                     elif dtype == 'Credit Card':
                         total_cards_total += amount
+                    elif dtype == 'Voucher':
+                        # Voucher line already contains net amount, so add directly to total
+                        total += amount
                 else:
                     other_total += amount
+
+                # Add to total for all types except Voucher (vouchers are handled above)
+                if dtype != 'Voucher':
+                    total += amount
 
                 for note_line in line.declaration_line_ids:
                     note_amount = note_line.amount_usd or 0.0
@@ -127,7 +134,8 @@ class StreamCashAppModel(models.Model):
                         elif transaction_type_name == 'OFFLINE - ZAR':
                             zar_offline += note_amount
 
-                total += amount
+            # No longer need to subtract vouchers issued and add vouchers redeemed
+            # because voucher line already contains the net amount
 
             cash_floats = total_float_lines
             cash_excl_floats = total_cash_lines + total_float_lines

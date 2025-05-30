@@ -47,26 +47,31 @@ class CashDeclarationWizard(models.TransientModel):
         declaration_notes = []
         cash_amount = 0
 
-        for rec in self.line_ids:
-            line_note = {}  # Always define fresh
-
-            amount = -rec.amount if self.related_is_negate else rec.amount  #  Apply negate logic
-
-            if rec.wizard_id.related_is_cash:
-                if rec.count > 0:
-                    line_note = {
-                        'amount': amount,  #  Store the possibly negative amount
-                        'currency_id': rec.currency_id.id,
-                        'count': rec.count,
-                        'denomination_id': rec.denomination_id.id,
-                        'transaction_type_id': rec.transaction_type_id.id if rec.transaction_type_id else False,
-                        'partner_id': rec.partner_id.id if rec.partner_id else False,
-                    }
-                    declaration_notes.append((0, 0, line_note))
-                    cash_amount += amount  #  Add possibly negative amount
-            else:
+        # Special handling for vouchers - calculate net amount
+        if self.declaration_type == 'Voucher':
+            vouchers_issued = 0
+            vouchers_redeemed = 0
+            
+            for rec in self.line_ids:
+                # Store voucher note lines with correct cash impact amounts
+                if rec.transaction_type_id and rec.transaction_type_id.name == 'Issued':
+                    vouchers_issued += rec.amount
+                    # Issued vouchers reduce cash, so store as negative
+                    amount = -rec.amount
+                elif rec.transaction_type_id and rec.transaction_type_id.name == 'Redeemed':
+                    vouchers_redeemed += rec.amount
+                    # Redeemed vouchers increase cash, so store as positive
+                    amount = rec.amount
+                else:
+                    amount = rec.amount
+                
+                # Apply negate logic if needed
+                if self.related_is_negate:
+                    amount = -amount
+                
+                # Create the note line with the correct cash impact amount
                 line_note = {
-                    'amount': amount,  #  Same for non-cash
+                    'amount': amount,
                     'currency_id': rec.currency_id.id,
                     'count': rec.count,
                     'denomination_id': rec.denomination_id.id if rec.denomination_id else False,
@@ -74,7 +79,41 @@ class CashDeclarationWizard(models.TransientModel):
                     'partner_id': rec.partner_id.id if rec.partner_id else False,
                 }
                 declaration_notes.append((0, 0, line_note))
-                cash_amount += amount  #  Again, add possibly negative
+            
+            # For vouchers, the net amount is redeemed minus issued
+            cash_amount = vouchers_redeemed - vouchers_issued
+            if self.related_is_negate:
+                cash_amount = -cash_amount
+        else:
+            # Regular handling for non-voucher declaration types
+            for rec in self.line_ids:
+                line_note = {}  # Always define fresh
+
+                amount = -rec.amount if self.related_is_negate else rec.amount  #  Apply negate logic
+
+                if rec.wizard_id.related_is_cash:
+                    if rec.count > 0:
+                        line_note = {
+                            'amount': amount,  #  Store the possibly negative amount
+                            'currency_id': rec.currency_id.id,
+                            'count': rec.count,
+                            'denomination_id': rec.denomination_id.id,
+                            'transaction_type_id': rec.transaction_type_id.id if rec.transaction_type_id else False,
+                            'partner_id': rec.partner_id.id if rec.partner_id else False,
+                        }
+                        declaration_notes.append((0, 0, line_note))
+                        cash_amount += amount  #  Add possibly negative amount
+                else:
+                    line_note = {
+                        'amount': amount,  #  Same for non-cash
+                        'currency_id': rec.currency_id.id,
+                        'count': rec.count,
+                        'denomination_id': rec.denomination_id.id if rec.denomination_id else False,
+                        'transaction_type_id': rec.transaction_type_id.id if rec.transaction_type_id else False,
+                        'partner_id': rec.partner_id.id if rec.partner_id else False,
+                    }
+                    declaration_notes.append((0, 0, line_note))
+                    cash_amount += amount  #  Again, add possibly negative
 
         print(declaration_notes)
 
