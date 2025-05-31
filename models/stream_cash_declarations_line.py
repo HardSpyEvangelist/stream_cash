@@ -5,7 +5,7 @@ class StreamCashDeclarationLine(models.Model):
     _name = "stream_cash.declaration.line"
     _description = " Stream Cash Declaration Line"
 
-    declaration_notes_line_ids = fields.One2many('stream_cash_declarations_notes.line','declaration_notes_lines_id', string="Declaration Notes",)
+    declaration_notes_line_ids = fields.One2many('stream_cash_declarations_notes.line','declaration_lines_id', string="Declaration Notes",)
     declaration_id = fields.Many2one('stream_cash.declarations',string="Declaration",required=True,ondelete='cascade')
     
     declaration_type_ids = fields.Many2one('declaration.type', string='Declaration Type', required=True)

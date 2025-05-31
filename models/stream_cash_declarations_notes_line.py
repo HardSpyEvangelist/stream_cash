@@ -5,7 +5,7 @@ class StreamCashDeclarationNotesLine(models.Model):
     _name = "stream_cash_declarations_notes.line"
     _description = " Stream Cash Declaration Notes Line"
 
-    declaration_notes_lines_id = fields.Many2one('stream_cash.declaration.line',string="Declaration")
+    declaration_lines_id = fields.Many2one('stream_cash.declaration.line',string="Declaration")
 
     amount = fields.Monetary(string="Amount")
     currency_id = fields.Many2one('res.currency',string="Currency")
@@ -47,20 +47,20 @@ class StreamCashDeclarationNotesLine(models.Model):
 
     def unlink(self):
         for record in self:
-            parent_state = record.declaration_notes_lines_id.declaration_id.state
+            parent_state = record.declaration_lines_id.declaration_id.state
             if parent_state != 'Draft':
                 raise UserError("You can only delete lines when the declaration is in Draft state.")
         return super().unlink()
 
     def copy(self, default=None):
         for record in self:
-            parent_state = record.declaration_notes_lines_id.declaration_id.state
+            parent_state = record.declaration_lines_id.declaration_id.state
             if parent_state != 'Draft':
                 raise UserError("You can only duplicate lines when the declaration is in Draft state.")
         return super().copy(default)
     
     def write(self, vals):
         for record in self:
-            if record.declaration_notes_lines_id.declaration_id.state != 'Draft':
+            if record.declaration_lines_id.declaration_id.state != 'Draft':
                 raise UserError("You can only modify records when the declaration is in Draft state.")
         return super(StreamCashDeclarationNotesLine, self).write(vals)
