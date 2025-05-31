@@ -9,7 +9,7 @@ class CashDeclarationWizardLine(models.TransientModel):
     amount = fields.Monetary(string="Amount")
     currency_id = fields.Many2one(string="Currency", related='wizard_id.currency_id')
     exchange_rate = fields.Float(string="Exchange Rate", related='wizard_id.currency_id.rate', readonly=True)
-    currency_usd = fields.Many2one('res.currency', string="Currency", default=lambda self: self.env.company.currency_id)
+    currency_usd = fields.Many2one('res.currency', string="Base Currency", default=lambda self: self.env.company.currency_id)
     company_id = fields.Many2one('res.company', string='Company', index=True, default=lambda self: self.env.company)
     amount_usd = fields.Monetary(string="Amount (USD)", compute="_compute_amount_usd", store=True)
 
@@ -18,7 +18,7 @@ class CashDeclarationWizardLine(models.TransientModel):
     # cash fields
     count = fields.Integer(string="Count")
     denomination_value = fields.Float(related='denomination_id.value', string="Value", readonly=True)
-    denomination_name = fields.Char(related='denomination_id.name', string="Denomination", readonly=True)
+    denomination_name = fields.Char(related='denomination_id.name', string="Denomination Name", readonly=True)
     denomination_id = fields.Many2one('currency.denomination', string="Denomination", readonly=True)
 
     # New transaction type field
@@ -55,6 +55,3 @@ class CashDeclarationWizardLine(models.TransientModel):
         for line in self:
             if line.wizard_id.related_is_cash:
                 line.amount = line.count * line.denomination_value
-
-
-    

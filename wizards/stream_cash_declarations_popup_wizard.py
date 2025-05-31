@@ -6,7 +6,7 @@ class CashDeclarationWizard(models.TransientModel):
     _name = "stream_cash_declarations_popup.wizard"
     _description = "Stream Cash Declaration Popup Wizard"
 
-    declaration_type_name = fields.Char(string="Declaration Type",related="declaration_type_ids.name",store=True)
+    declaration_type_name = fields.Char(string="Declaration Type Name",related="declaration_type_ids.name",store=True)
     declaration_type_ids = fields.Many2one('declaration.type', string='Declaration Type', required=True)
     declaration_id = fields.Many2one('stream_cash.declarations', string="Declaration", required=True)
     currency_id = fields.Many2one('res.currency', string="Currency", required=True)
@@ -16,11 +16,6 @@ class CashDeclarationWizard(models.TransientModel):
     related_is_cash = fields.Boolean(related='declaration_type_ids.is_cash', store=True)
     related_is_negate = fields.Boolean(related='declaration_type_ids.is_negate', store=True)
 
-
-    
-    
-
-    
     total_amount = fields.Float(string="Total Amount", compute="_compute_total_amount", store=True)
     total_amount_usd = fields.Float(string="Total Amount (USD)", store=True)
 
@@ -52,15 +47,15 @@ class CashDeclarationWizard(models.TransientModel):
             vouchers_issued = 0
             vouchers_redeemed = 0
             
+            # First pass: calculate totals and store individual lines for record keeping
             for rec in self.line_ids:
-                # Store voucher note lines with correct cash impact amounts
                 if rec.transaction_type_id and rec.transaction_type_id.name == 'Issued':
                     vouchers_issued += rec.amount
-                    # Issued vouchers reduce cash, so store as negative
+                    # Store individual line with negative amount for cash impact
                     amount = -rec.amount
                 elif rec.transaction_type_id and rec.transaction_type_id.name == 'Redeemed':
                     vouchers_redeemed += rec.amount
-                    # Redeemed vouchers increase cash, so store as positive
+                    # Store individual line with positive amount for cash impact
                     amount = rec.amount
                 else:
                     amount = rec.amount
@@ -80,10 +75,11 @@ class CashDeclarationWizard(models.TransientModel):
                 }
                 declaration_notes.append((0, 0, line_note))
             
-            # For vouchers, the net amount is redeemed minus issued
+            # Calculate the net cash amount (this is already correct)
             cash_amount = vouchers_redeemed - vouchers_issued
             if self.related_is_negate:
                 cash_amount = -cash_amount
+                
         else:
             # Regular handling for non-voucher declaration types
             for rec in self.line_ids:
@@ -115,8 +111,6 @@ class CashDeclarationWizard(models.TransientModel):
                     declaration_notes.append((0, 0, line_note))
                     cash_amount += amount  #  Again, add possibly negative
 
-        print(declaration_notes)
-
         self.env['stream_cash.declaration.line'].create({
             'declaration_id': self.declaration_id.id,
             'declaration_type_ids': self.declaration_type_ids.id,
@@ -126,3 +120,24 @@ class CashDeclarationWizard(models.TransientModel):
         })
 
         return {'type': 'ir.actions.act_window_close'}
+
+    @api.depends('line_ids.amount')
+    def _compute_total_amount(self):
+        for wizard in self:
+            if wizard.declaration_type_name == 'Voucher':
+                # For vouchers, calculate net amount (redeemed - issued)
+                vouchers_issued = 0
+                vouchers_redeemed = 0
+                
+                for line in wizard.line_ids:
+                    if line.transaction_type_id and line.transaction_type_id.name == 'Issued':
+                        vouchers_issued += line.amount
+                    elif line.transaction_type_id and line.transaction_type_id.name == 'Redeemed':
+                        vouchers_redeemed += line.amount
+                
+                net_amount = vouchers_redeemed - vouchers_issued
+                wizard.total_amount = -net_amount if wizard.related_is_negate else net_amount
+            else:
+                # For non-vouchers, sum all line amounts
+                total = sum(line.amount for line in wizard.line_ids)
+                wizard.total_amount = -total if wizard.related_is_negate else total

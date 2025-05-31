@@ -2,7 +2,7 @@ from odoo import models, fields, api
 
 class CurrencyDenomination(models.Model):
     _name = "currency.denomination"
-    _description = "Currency Denomination"
+    _description = "Currency Denominations"
     
     name = fields.Char(string="Name", required=True)
     value = fields.Float(string="Value", required=True)

@@ -10,14 +10,14 @@ class StreamCashDeclarationNotesLine(models.Model):
     amount = fields.Monetary(string="Amount")
     currency_id = fields.Many2one('res.currency',string="Currency")
     exchange_rate = fields.Float(string="Exchange Rate",related='currency_id.rate',readonly=True)
-    currency_usd = fields.Many2one('res.currency', string="Currency",default=lambda self: self.env.company.currency_id)
+    currency_usd = fields.Many2one('res.currency', string="Base Currency",default=lambda self: self.env.company.currency_id)
     company_id = fields.Many2one('res.company', string='Company', index=True, default=lambda self: self.env.company)
     amount_usd = fields.Monetary(string="Amount (USD)",compute="_compute_amount_usd",store=True)
     
     #cash fields
     count = fields.Integer(string="Count")
-    denomination_value = fields.Float(related='denomination_id.value', string="Value", readonly=True)
-    denomination_name = fields.Char(related='denomination_id.name', string="Denomination", readonly=True)
+    denomination_value = fields.Float(related='denomination_id.value', string="Denomination Value", readonly=True)
+    denomination_name = fields.Char(related='denomination_id.name', string="Denomination Name", readonly=True)
     denomination_id = fields.Many2one('currency.denomination',string="Denomination",readonly=True)
     
     # New transaction type field

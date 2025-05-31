@@ -8,7 +8,7 @@ class TransactionType(models.Model):
 
     name = fields.Char(string="Transaction Type Name", required=True)
     declaration_type_id = fields.Many2one('declaration.type', string='Declaration Type', required=True)
-    declaration_type_name = fields.Char(related='declaration_type_id.name', string="Declaration Type", store=True)
+    declaration_type_name = fields.Char(related='declaration_type_id.name', string="Declaration Type Name", store=True)
     sequence = fields.Integer(string="Sequence", default=10)
     active = fields.Boolean(string="Active", default=True)
     
