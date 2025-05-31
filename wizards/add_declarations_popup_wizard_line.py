@@ -3,7 +3,7 @@ from odoo import fields, models, api
 
 class CashDeclarationWizardLine(models.TransientModel):
     _name = "add_declarations_popup_wizard.line"
-    _description = "Add Declaration Wizard Line"
+    _description = "Add Declaration Popup Wizard Line"
 
     wizard_id = fields.Many2one('add_declarations_popup.wizard', string="Wizard", required=True, ondelete='cascade')
     amount = fields.Monetary(string="Amount")
@@ -12,6 +12,8 @@ class CashDeclarationWizardLine(models.TransientModel):
     currency_usd = fields.Many2one('res.currency', string="Currency", default=lambda self: self.env.company.currency_id)
     company_id = fields.Many2one('res.company', string='Company', index=True, default=lambda self: self.env.company)
     amount_usd = fields.Monetary(string="Amount (USD)", compute="_compute_amount_usd", store=True)
+
+    declaration_type = fields.Integer(string='Declaration Type')
 
     # cash fields
     count = fields.Integer(string="Count")

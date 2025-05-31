@@ -4,9 +4,9 @@ from odoo.exceptions import ValidationError
 
 class CashDeclarationWizard(models.TransientModel):
     _name = "add_declarations_popup.wizard"
-    _description = "Add Declaration Wizard"
+    _description = "Add Declaration Popup Wizard"
 
-    declaration_type = fields.Char(string="Declaration Type",related="declaration_type_ids.name",store=True)
+    declaration_type_name = fields.Char(string="Declaration Type",related="declaration_type_ids.name",store=True)
     declaration_type_ids = fields.Many2one('declaration.type', string='Declaration Type', required=True)
     declaration_id = fields.Many2one('stream_cash.declarations', string="Declaration", required=True)
     currency_id = fields.Many2one('res.currency', string="Currency", required=True)
@@ -122,7 +122,7 @@ class CashDeclarationWizard(models.TransientModel):
             'declaration_type_ids': self.declaration_type_ids.id,
             'currency_id': self.currency_id.id,
             'amount': cash_amount,
-            'declaration_line_ids': declaration_notes,
+            'declaration_notes_line_ids': declaration_notes,
         })
 
-        return {'type': 'ir.actions.act_window_close'}-
+        return {'type': 'ir.actions.act_window_close'}

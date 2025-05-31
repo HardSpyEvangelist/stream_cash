@@ -4,7 +4,7 @@ from odoo.exceptions import UserError
 class StreamCashAppModel(models.Model):
     _name = "stream_cash.declarations"
     _inherit = ["mail.thread", "mail.activity.mixin"]
-    _description = "Stream Cash App Declarations"
+    _description = "Stream Cash Declarations"
     _rec_name = 'cashier_name'
 
     declaration_type_ids = fields.Many2one('declaration.type', string='Declaration Type', required=True)
@@ -66,7 +66,7 @@ class StreamCashAppModel(models.Model):
             },
         }
 
-    @api.depends('declaration_lines.amount_usd', 'declaration_lines.declaration_type')
+    @api.depends('declaration_lines.amount_usd', 'declaration_lines.declaration_type_name')
     def _compute_all_totals(self):
         known_types = {'Pickup', 'Accounts', 'Credit Note', 'Cash', 'Floats', 'Credit Card', 'Voucher', 'Payment Out'}
 
@@ -110,7 +110,7 @@ class StreamCashAppModel(models.Model):
                 if dtype != 'Voucher':
                     total += amount
 
-                for note_line in line.declaration_line_ids:
+                for note_line in line.declaration_notes_line_ids:
                     note_amount = note_line.amount_usd or 0.0
                     transaction_type_name = note_line.transaction_type_id.name if note_line.transaction_type_id else ''
 

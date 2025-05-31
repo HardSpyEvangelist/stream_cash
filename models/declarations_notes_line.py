@@ -3,7 +3,7 @@ from odoo.exceptions import UserError
 
 class StreamCashDeclarationNotesLine(models.Model):
     _name = "stream_cash_declarations_notes.line"
-    _description = "Declaration Line"
+    _description = " Stream Cash Declaration Notes Line"
 
     declaration_notes_lines_id = fields.Many2one('stream_cash.declaration.line',string="Declaration")
 

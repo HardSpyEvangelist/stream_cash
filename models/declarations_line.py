@@ -3,13 +3,13 @@ from odoo import models, fields, api
 
 class StreamCashDeclarationLine(models.Model):
     _name = "stream_cash.declaration.line"
-    _description = "Declaration Line"
+    _description = " Stream Cash Declaration Line"
 
-    declaration_line_ids = fields.One2many('stream_cash_declarations_notes.line','declaration_notes_lines_id', string="Declaration",)
+    declaration_notes_line_ids = fields.One2many('stream_cash_declarations_notes.line','declaration_notes_lines_id', string="Declaration",)
     declaration_id = fields.Many2one('stream_cash.declarations',string="Declaration",required=True,ondelete='cascade')
     
     declaration_type_ids = fields.Many2one('declaration.type', string='Declaration Type', required=True)
-    declaration_type = fields.Char(string="Declaration Type",related="declaration_type_ids.name",store=True )
+    declaration_type_name = fields.Char(string="Declaration Type",related="declaration_type_ids.name",store=True )
     currency_id = fields.Many2one('res.currency', string="Currency")
     currency_usd = fields.Many2one('res.currency',string="Currency",help="This field ensures compatibility with monetary fields",default=lambda self: self.env.company.currency_id)
     company_id = fields.Many2one('res.company', string='Company', index=True, default=lambda self: self.env.company)
