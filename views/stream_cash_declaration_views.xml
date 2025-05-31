@@ -28,8 +28,8 @@
                 <field name="usd_offline" width="150px"/>
                 <field name="zig_eft" width="150px"/>
                 <field name="zig_offline" width="150px"/>
-                <field name="zar_eft" width="150px"/>
-                <field name="zar_offline" width="150px"/>
+                <!-- <field name="zar_eft" width="150px"/> -->
+                <!-- <field name="zar_offline" width="150px"/> -->
                 <field name="total_cards_total" width="150px"/>
                 <field name="pickups_cash" width="150px"/>
                 <field name= "payment_out" width="150px"/>

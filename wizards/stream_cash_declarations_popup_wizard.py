@@ -3,14 +3,14 @@ from odoo.exceptions import ValidationError
 
 
 class CashDeclarationWizard(models.TransientModel):
-    _name = "add_declarations_popup.wizard"
+    _name = "stream_cash_declarations_popup.wizard"
     _description = "Add Declaration Popup Wizard"
 
     declaration_type_name = fields.Char(string="Declaration Type",related="declaration_type_ids.name",store=True)
     declaration_type_ids = fields.Many2one('declaration.type', string='Declaration Type', required=True)
     declaration_id = fields.Many2one('stream_cash.declarations', string="Declaration", required=True)
     currency_id = fields.Many2one('res.currency', string="Currency", required=True)
-    line_ids = fields.One2many('add_declarations_popup_wizard.line', 'wizard_id', string="Lines")
+    line_ids = fields.One2many('stream_cash_declarations_popup_wizard.line', 'wizard_id', string="Lines")
 
     related_is_partner = fields.Boolean(related='declaration_type_ids.is_partner', store=True)
     related_is_cash = fields.Boolean(related='declaration_type_ids.is_cash', store=True)
@@ -48,7 +48,7 @@ class CashDeclarationWizard(models.TransientModel):
         cash_amount = 0
 
         # Special handling for vouchers - calculate net amount
-        if self.declaration_type == 'Voucher':
+        if self.declaration_type_name == 'Voucher':
             vouchers_issued = 0
             vouchers_redeemed = 0
             

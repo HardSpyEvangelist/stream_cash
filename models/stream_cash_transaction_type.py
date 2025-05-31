@@ -1,7 +1,7 @@
 from odoo import models, fields, api
 
 class TransactionType(models.Model):
-    _name = "transaction.type"
+    _name = "stream_cash_transaction.type"
     _description = " Stream Cash Transaction Type"
     _rec_name = 'name'
     _order = 'declaration_type_id, sequence, name'

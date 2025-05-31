@@ -21,7 +21,7 @@ class StreamCashDeclarationNotesLine(models.Model):
     denomination_id = fields.Many2one('currency.denomination',string="Denomination",readonly=True)
     
     # New transaction type field
-    transaction_type_id = fields.Many2one('transaction.type', string="Transaction Type")
+    transaction_type_id = fields.Many2one('stream_cash_transaction.type', string="Transaction Type")
     
     #credit notes fields
     partner_id = fields.Many2one('res.partner', string='Account Name')

@@ -2,10 +2,10 @@ from odoo import fields, models, api
 
 
 class CashDeclarationWizardLine(models.TransientModel):
-    _name = "add_declarations_popup_wizard.line"
+    _name = "stream_cash_declarations_popup_wizard.line"
     _description = "Add Declaration Popup Wizard Line"
 
-    wizard_id = fields.Many2one('add_declarations_popup.wizard', string="Wizard", required=True, ondelete='cascade')
+    wizard_id = fields.Many2one('stream_cash_declarations_popup.wizard', string="Wizard", required=True, ondelete='cascade')
     amount = fields.Monetary(string="Amount")
     currency_id = fields.Many2one(string="Currency", related='wizard_id.currency_id')
     exchange_rate = fields.Float(string="Exchange Rate", related='wizard_id.currency_id.rate', readonly=True)
@@ -22,7 +22,7 @@ class CashDeclarationWizardLine(models.TransientModel):
     denomination_id = fields.Many2one('currency.denomination', string="Denomination", readonly=True)
 
     # New transaction type field
-    transaction_type_id = fields.Many2one('transaction.type', string="Transaction Type")
+    transaction_type_id = fields.Many2one('stream_cash_transaction.type', string="Transaction Type")
 
     
     

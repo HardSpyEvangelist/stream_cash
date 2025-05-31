@@ -16,7 +16,7 @@
         # Views and other data files
         'views/root_menus.xml',
         'views/stream_cash_declaration_views.xml',
-        'views/add_declarations_popup_wizard.xml',
+        'views/stream_cash_declarations_popup_wizard_views.xml',
         'views/res_currency_inherit_views.xml',
         'views/res_employee_inherit_views.xml',
         'views/stream_cash_declarations_notes_line.xml',

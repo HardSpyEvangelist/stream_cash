@@ -58,7 +58,7 @@ class StreamCashAppModel(models.Model):
         self.ensure_one()
         return {
             'type': 'ir.actions.act_window',
-            'res_model': 'add_declarations_popup.wizard',
+            'res_model': 'stream_cash_declarations_popup.wizard',
             'view_mode': 'form',
             'target': 'new',
             'context': {
@@ -83,7 +83,7 @@ class StreamCashAppModel(models.Model):
 
             for line in record.declaration_lines:
                 amount = line.amount_usd or 0.0
-                dtype = line.declaration_type or ''
+                dtype = line.declaration_type_name or ''
 
                 if dtype in known_types:
                     if dtype == 'Pickup':
