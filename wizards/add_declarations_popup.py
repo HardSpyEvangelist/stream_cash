@@ -125,4 +125,4 @@ class CashDeclarationWizard(models.TransientModel):
             'declaration_line_ids': declaration_notes,
         })
 
-        return {'type': 'ir.actions.act_window_close'}
+        return {'type': 'ir.actions.act_window_close'}-
