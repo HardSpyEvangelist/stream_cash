@@ -4,7 +4,7 @@ from odoo.exceptions import ValidationError
 
 class CashDeclarationWizard(models.TransientModel):
     _name = "stream_cash_declarations_popup.wizard"
-    _description = "Add Declaration Popup Wizard"
+    _description = "Stream Cash Declaration Popup Wizard"
 
     declaration_type_name = fields.Char(string="Declaration Type",related="declaration_type_ids.name",store=True)
     declaration_type_ids = fields.Many2one('declaration.type', string='Declaration Type', required=True)

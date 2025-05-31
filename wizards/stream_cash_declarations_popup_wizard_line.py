@@ -3,7 +3,7 @@ from odoo import fields, models, api
 
 class CashDeclarationWizardLine(models.TransientModel):
     _name = "stream_cash_declarations_popup_wizard.line"
-    _description = "Add Declaration Popup Wizard Line"
+    _description = "Stream Cash Declaration Popup Wizard Line"
 
     wizard_id = fields.Many2one('stream_cash_declarations_popup.wizard', string="Wizard", required=True, ondelete='cascade')
     amount = fields.Monetary(string="Amount")
