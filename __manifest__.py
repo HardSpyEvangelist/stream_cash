@@ -15,14 +15,14 @@
         
         # Views and other data files
         'views/root_menus.xml',
-        'views/declaration_views.xml',
+        'views/stream_cash_declaration_views.xml',
         'views/add_declarations_popup_wizard.xml',
-        'views/currency_views_inherit.xml',
-        'views/employee_views_inherit.xml',
-        'views/declarations_notes_line.xml',
-        'views/declaration_line.xml',
-        'views/declaration_type_views.xml',
-        'views/transaction_type_views.xml'
+        'views/res_currency_inherit_views.xml',
+        'views/res_employee_inherit_views.xml',
+        'views/stream_cash_declarations_notes_line.xml',
+        'views/stream_cash_declaration_line.xml',
+        'views/stream_cash_declaration_type_views.xml',
+        'views/stream_cash_transaction_type_views.xml'
     ],
     'license': 'LGPL-3',
 }
