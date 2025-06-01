@@ -14,23 +14,7 @@
             </list>
         </field>
     </record>
-
-    <!-- Form View
-    <record id="view_declaration_type_form" model="ir.ui.view">
-        <field name="name">declaration.type.form</field>
-        <field name="model">declaration.type</field>
-        <field name="arch" type="xml">
-            <form string="Declaration Type">
-                <sheet>
-                    <group>                     
-                        
-                    </group>
-                </sheet>
-            </form>
-        </field>
-    </record> -->
-
-    <!-- Action -->
+    
     <record id="action_declaration_type" model="ir.actions.act_window">
         <field name="name">Declaration Types</field>
         <field name="res_model">declaration.type</field>

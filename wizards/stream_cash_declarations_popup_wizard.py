@@ -10,7 +10,7 @@ class CashDeclarationWizard(models.TransientModel):
     declaration_type_ids = fields.Many2one('declaration.type', string='Declaration Type', required=True)
     declaration_id = fields.Many2one('stream_cash.declarations', string="Declaration", required=True)
     currency_id = fields.Many2one('res.currency', string="Currency", required=True)
-    line_ids = fields.One2many('stream_cash_declarations_popup_wizard.line', 'wizard_id', string="Lines")
+    line_ids = fields.One2many('stream_cash_declarations_popup_wizard.line', 'stream_cash_declarations_popup_wizard_id', string="Lines")
 
     related_is_partner = fields.Boolean(related='declaration_type_ids.is_partner', store=True)
     related_is_cash = fields.Boolean(related='declaration_type_ids.is_cash', store=True)
@@ -87,7 +87,7 @@ class CashDeclarationWizard(models.TransientModel):
 
                 amount = -rec.amount if self.related_is_negate else rec.amount  #  Apply negate logic
 
-                if rec.wizard_id.related_is_cash:
+                if rec.stream_cash_declarations_popup_wizard_id.related_is_cash:
                     if rec.count > 0:
                         line_note = {
                             'amount': amount,  #  Store the possibly negative amount

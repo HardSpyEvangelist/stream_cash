@@ -6,6 +6,7 @@ class StreamCashDeclarationNotesLine(models.Model):
     _description = " Stream Cash Declaration Notes Line"
 
     declaration_lines_id = fields.Many2one('stream_cash.declaration.line',string="Declaration")
+    declaration_type_id = fields.Many2one('declaration.type', string='Declaration Type')
 
     amount = fields.Monetary(string="Amount")
     currency_id = fields.Many2one('res.currency',string="Currency")
@@ -15,10 +16,11 @@ class StreamCashDeclarationNotesLine(models.Model):
     amount_usd = fields.Monetary(string="Amount (USD)",compute="_compute_amount_usd",store=True)
     
     #cash fields
+    denomination_id = fields.Many2one('currency.denomination',string="Denomination")
     count = fields.Integer(string="Count")
-    denomination_value = fields.Float(related='denomination_id.value', string="Denomination Value", readonly=True)
-    denomination_name = fields.Char(related='denomination_id.name', string="Denomination Name", readonly=True)
-    denomination_id = fields.Many2one('currency.denomination',string="Denomination",readonly=True)
+    denomination_value = fields.Float(related='denomination_id.value', string="Denomination Value")
+    denomination_name = fields.Char(related='denomination_id.name', string="Denomination Name")
+    
     
     # New transaction type field
     transaction_type_id = fields.Many2one('stream_cash_transaction.type', string="Transaction Type")

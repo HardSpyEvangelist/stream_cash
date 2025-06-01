@@ -7,13 +7,12 @@ class StreamCashAppModel(models.Model):
     _description = "Stream Cash Declarations"
     _rec_name = 'cashier_name'
 
-    declaration_type_ids = fields.Many2one('declaration.type', string='Declaration Type', required=True)
 
-    cashier_name = fields.Many2one('hr.employee', string='Cashier')
+    
+    cashier_name = fields.Many2one('hr.employee',string='Cashier',domain="[('job_id.name', '=', 'Cashier')]")
     cashier_number = fields.Char(string="Cashier Number", related='cashier_name.employee_cashier_number', store=True)
-
-    supervisor_name = fields.Many2one('hr.employee', string="Supervisor")
-    manager_name = fields.Many2one('hr.employee', string="Manager")
+    supervisor_name = fields.Many2one('hr.employee',string="Supervisor",domain="[('job_id.name', '=', 'Supervisor')]")
+    manager_name = fields.Many2one('hr.employee',string="Manager",domain="[('job_id.name', '=', 'Manager')]")
 
     date = fields.Datetime(string='Date', default=fields.Datetime.now)
     total_declared = fields.Float(string="Total Declared")
