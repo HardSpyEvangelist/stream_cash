@@ -141,8 +141,8 @@ class StreamCashAppModel(models.Model):
 
             record.total = total
             record.pickups_cash = pickups_cash
-            record.accoussh -T git@github.com
-
+            record.accounts = accounts
+            record.credit_notes = credit_notes
             record.cash_floats = cash_floats
             record.payment_out = payment_out
             record.cash_excl_floats = cash_excl_floats
