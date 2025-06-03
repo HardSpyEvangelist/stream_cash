@@ -20,7 +20,7 @@ class StreamCashAppModel(models.Model):
     cashup_z_reading = fields.Float(string="Cashup Z Reading")
     variance = fields.Float(string="Variance", compute='_compute_variance')
 
-    cash_floats = fields.Integer(compute='_compute_all_totals', store=True)
+    cash_floats = fields.Integer(compute='_compute_all_totals')
     cash_excl_floats = fields.Float(compute='_compute_all_totals', string='Cash Excl Floats (USD)', store=True)
     accounts = fields.Float(compute='_compute_all_totals', string='Accounts (USD)', store=True)
     credit_notes = fields.Float(compute='_compute_all_totals', string='Credit Notes (USD)', store=True)

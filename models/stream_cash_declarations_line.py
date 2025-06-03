@@ -38,7 +38,7 @@ class StreamCashDeclarationLine(models.Model):
                 rec.amount = -net if rec.related_is_negate else net
             else:
                 total = sum(l.amount for l in rec.declaration_notes_line_ids)
-                rec.amount = -total if rec.related_is_negate else total
+                rec.amount = total
 
 
     @api.depends('amount', 'currency_id')

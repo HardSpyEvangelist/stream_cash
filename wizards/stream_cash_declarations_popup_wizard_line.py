@@ -45,6 +45,11 @@ class CashDeclarationWizardLine(models.TransientModel):
             else:
                 record.amount_usd = 0.0
 
+            if record.stream_cash_declarations_popup_wizard_id.related_is_negate == True:
+                record.amount_usd = record.amount_usd * -1
+
+            print(record.stream_cash_declarations_popup_wizard_id.related_is_negate) 
+
     @api.onchange('amount')
     def _onchange_amount(self):
         for record in self:
