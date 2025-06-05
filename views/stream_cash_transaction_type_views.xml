@@ -8,8 +8,8 @@
             <list string="Transaction Types" editable="bottom">
                 <field name="sequence" widget="handle"/>
                 <field name="declaration_type_id" options="{'no_create': True, 'no_open': True}"/> 
-                <!-- <field name="declaration_type_name"/> -->
-                <field name="name" string="Trasaction Type"/>
+                <field name="name" string="Transaction Type"/>
+                <field name="applicable_currency_id" string="Applicable Currency" options="{'no_create': True, 'no_open': True}" optional="show"/>
                 <field name="active"/>
             </list>
         </field>
@@ -26,6 +26,7 @@
                         <group>
                             <field name="name"/>
                             <field name="declaration_type_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="applicable_currency_id" options="{'no_create': True, 'no_open': True}"/>
                         </group>
                         <group>
                             <field name="sequence"/>
@@ -36,9 +37,6 @@
             </form>
         </field>
     </record>
-
-    <!-- Search View for Transaction Types -->
-    
 
     <!-- Action for Transaction Types -->
     <record id="action_transaction_type" model="ir.actions.act_window">
@@ -51,6 +49,8 @@
             </p>
             <p>
                 Transaction types are used to categorize different types of transactions within each declaration type.
+                You can optionally specify an applicable currency to limit when this transaction type appears.
+                Leave the currency empty to make it available for all currencies.
                 You can add, modify, or remove transaction types as needed for your business.
             </p>
         </field>

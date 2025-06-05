@@ -42,22 +42,24 @@ class CashDeclarationWizard(models.TransientModel):
                         'exchange_rate': self.currency_id.rate or 1.0
                     }))
             
-            # Handle transaction types (new dynamic logic)
+            # Handle transaction types (flexible currency-based filtering)
             transaction_types = self.env['stream_cash_transaction.type'].search([
                 ('declaration_type_id', '=', self.declaration_type_ids.id),
                 ('active', '=', True)
             ], order='sequence, name')
             
-            # Special handling for Credit Card - filter by currency (ENHANCED VERSION)
-            if transaction_types and self.declaration_type_name == 'Credit Card':
-                currency_code = self.currency_id.name  # USD, ZWG, GBP, etc.
-                # Handle special case: ZWG currency uses "ZiG" in transaction type names
-                search_term = 'ZiG' if currency_code == 'ZWG' else currency_code
+            # Filter by currency if applicable_currency_id is set
+            if transaction_types:
+                # First, check if any transaction types have specific currency requirements
+                currency_specific_types = transaction_types.filtered('applicable_currency_id')
                 
-                # ENHANCED: Case-insensitive, position-independent matching
-                transaction_types = transaction_types.filtered(
-                    lambda t: search_term.upper() in t.name.upper()
-                )
+                if currency_specific_types:
+                    # If there are currency-specific types, only show those matching the selected currency
+                    # plus any that don't have a specific currency requirement
+                    transaction_types = transaction_types.filtered(
+                        lambda t: not t.applicable_currency_id or t.applicable_currency_id.id == self.currency_id.id
+                    )
+                # If no transaction types have currency requirements, show all of them
             
             if transaction_types:
                 for transaction_type in transaction_types:
