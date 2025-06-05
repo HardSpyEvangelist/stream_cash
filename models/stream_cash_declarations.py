@@ -7,7 +7,7 @@ class StreamCashAppModel(models.Model):
     _description = "Stream Cash Declarations"
     _rec_name = 'cashier_name'
 
-    cashier_name = fields.Many2one('hr.employee',string='Cashier',domain="[('job_id.name', '=', 'Cashier')]")
+    cashier_name = fields.Many2one('hr.employee',string='Cashier',domain="[('job_id.name', '=', 'Cashier')]", required=True)
     cashier_number = fields.Char(string="Cashier Number", related='cashier_name.employee_cashier_number', store=True)
     supervisor_name = fields.Many2one('hr.employee',string="Supervisor",domain="[('job_id.name', '=', 'Supervisor')]")
     manager_name = fields.Many2one('hr.employee',string="Manager",domain="[('job_id.name', '=', 'Manager')]")
@@ -16,7 +16,7 @@ class StreamCashAppModel(models.Model):
     verified_date = fields.Datetime(string='Verified Date')  # NEW FIELD
     total_declared = fields.Float(string="Total Declared")
     wrong_tenders_or_comments = fields.Text(string="Wrong Tenders / Comments")
-    cashup_z_reading = fields.Float(string="Cashup Z Reading (USD)")
+    cashup_z_reading = fields.Float(string="Cashup Z Reading (USD)", required=True)
     variance = fields.Float(string="Variance (USD)", compute='_compute_variance')
 
     cash_floats = fields.Integer(string='Floats (USD)',compute='_compute_all_totals')
