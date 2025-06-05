@@ -17,7 +17,7 @@
                                     <field name="denomination_name" readonly="1" width="80px" column_invisible="not parent.related_is_cash"/>
                                     <field name="denomination_value" force_save="1" readonly="1" column_invisible="not parent.related_is_cash"/>
                                     <field name="count" column_invisible="not parent.related_is_cash"/>        
-                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="currency_id" column_invisible="1" readonly="1"/>
                                     <field name="amount" readonly="1" options="{'currency_field': 'currency_id'}" 
                                            decoration-danger="amount &lt; 0"/>
                                     <field name="exchange_rate" readonly="1"/>

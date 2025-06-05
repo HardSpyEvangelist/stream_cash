@@ -8,7 +8,7 @@ class StreamCashDeclarationLine(models.Model):
     declaration_notes_line_ids = fields.One2many('stream_cash_declarations_notes.line','declaration_lines_id', string="Declaration Notes")
     declaration_id = fields.Many2one('stream_cash.declarations',string="Declaration",required=True,ondelete='cascade')
     
-    declaration_type_ids = fields.Many2one('declaration.type', string='Declaration Type', required=True)
+    declaration_type_ids = fields.Many2one('declaration.type', string='Declaration Type', required=True, readonly=True)
     declaration_type_name = fields.Char(string="Declaration Type Name",related="declaration_type_ids.name",store=True )
     currency_id = fields.Many2one('res.currency', string="Currency")
     currency_usd = fields.Many2one('res.currency',string="Base Currency",help="This field ensures compatibility with monetary fields",default=lambda self: self.env.company.currency_id)

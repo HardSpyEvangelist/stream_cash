@@ -11,7 +11,9 @@
                 <field name="state"
                        decoration-info="state == 'Draft'"
                        decoration-warning="state == 'Verified'"
-                       decoration-success="state == 'Closed'"/>
+                       decoration-success="state == 'Closed'"
+                       decoration-muted="state == 'Cancelled'"
+                       decoration-danger="state == 'Deleted'"/>
                 <field name="date"/>
                 <field name="cashier_number" width="150px"/>
                 <field name="cashier_name" width="150px"/>
@@ -39,26 +41,41 @@
         </field>
     </record>
 
-    <!-- Updated Search View with New Today Filters -->
+    <!-- Updated Search View with New Filters -->
     <record id="view_declarations_search" model="ir.ui.view">
         <field name="name">stream_cash.declarations.search</field>
         <field name="model">stream_cash.declarations</field>
         <field name="arch" type="xml">
             <search string="Search Declarations">
-                <!-- EXISTING FILTERS (unchanged) -->
+                <!-- DEFAULT FILTER: Show only active records (not cancelled or deleted) -->
+                <filter name="filter_active" string="Active Records" 
+                        domain="[('state','not in',['Cancelled','Deleted'])]"/>
+                
+                <separator/>
+                
+                <!-- STATUS FILTERS -->
                 <filter name="filter_draft" string="Draft" domain="[('state','=','Draft')]"/>
                 
-                <!-- NEW: Draft Today Filter -->
+                <!-- Draft Today Filter -->
                 <filter name="filter_draft_today" string="Draft Today" 
                         domain="[('state','=','Draft'),('date','&gt;=',datetime.datetime.combine(context_today(),datetime.time(0,0,0))),('date','&lt;=',datetime.datetime.combine(context_today(),datetime.time(23,59,59)))]"/>
                 
                 <filter name="filter_verified" string="Verified" domain="[('state','=','Verified')]"/>
                 
-                <!-- NEW: Verified Today Filter -->
+                <!-- Verified Today Filter -->
                 <filter name="filter_verified_today" string="Verified Today" 
                         domain="[('state','=','Verified'),('verified_date','&gt;=',datetime.datetime.combine(context_today(),datetime.time(0,0,0))),('verified_date','&lt;=',datetime.datetime.combine(context_today(),datetime.time(23,59,59)))]"/>
                 
                 <filter name="filter_closed" string="Closed" domain="[('state','=','Closed')]"/>
+                
+                <separator/>
+                
+                <!-- NEW FILTERS FOR CANCELLED AND DELETED -->
+                <filter name="filter_cancelled" string="Cancelled" domain="[('state','=','Cancelled')]"/>
+                <filter name="filter_deleted" string="Deleted" domain="[('state','=','Deleted')]"/>
+                
+                <!-- Show All (including cancelled and deleted) -->
+                <filter name="filter_all" string="All Records (Inc. Cancelled/Deleted)" domain="[]"/>
 
                 <separator/>
 
@@ -78,32 +95,66 @@
             <form string="Declarations">
                 <header>
                     <button name="action_open_type_selector"
-                            string="Add Declaration Line"
-                            type="object"
-                            class="btn-primary"
-                            context="{'default_declaration_id': id}"
-                            invisible="state != 'Draft'"/>
+                    string="Add Declaration Line"
+                    type="object"
+                    class="btn-primary"
+                    context="{'default_declaration_id': id}"
+                    invisible="state not in ['Draft']"
+                    groups="!stream_cash.group_streamcash_supervisor,!stream_cash.group_streamcash_manager"/>
+                    
                     <button name="action_verify"
                             string="Verify"
                             type="object"
                             class="btn-primary"
                             invisible="state != 'Draft'"
                             groups="stream_cash.group_streamcash_supervisor"/>
+                    
                     <button name="action_close"
                             string="Close"
                             type="object"
                             class="btn-primary"
                             invisible="state != 'Verified'"
                             groups="stream_cash.group_streamcash_manager"/>
+                    
+                    <!-- NEW CANCEL BUTTON -->
+                    <button name="action_cancel"
+                            string="Cancel"
+                            type="object"
+                            class="btn-warning"
+                            invisible="state in ['Cancelled', 'Deleted']"
+                            groups="stream_cash.group_streamcash_supervisor"
+                            confirm="Are you sure you want to cancel this declaration?"/>
+                    
+                    <!-- NEW DELETE BUTTON -->
+                    <button name="action_delete"
+                            string="Delete"
+                            type="object"
+                            class="btn-danger"
+                            invisible="state == 'Deleted'"
+                            groups="stream_cash.group_streamcash_manager"
+                            confirm="Are you sure you want to mark this declaration as deleted? This action cannot be undone."/>
+                    
                     <button name="action_reset_to_draft"
                             string="Reset to Draft"
                             type="object"
                             class="btn-secondary"
-                            invisible="state == 'Draft'"
+                            invisible="state in ['Draft', 'Deleted']"
                             groups="stream_cash.group_streamcash_manager"/>
+                    
+                    <!-- UPDATED STATUSBAR to include new states -->
                     <field name="state" widget="statusbar" statusbar_visible="Draft,Verified,Closed"/>
                 </header>
                 <sheet>
+                    <!-- Add alert for cancelled/deleted records -->
+                    <div class="alert alert-warning" role="alert" invisible="state != 'Cancelled'">
+                        <strong>This declaration has been cancelled.</strong>
+                        <field name="cancelled_date" readonly="1"/>
+                    </div>
+                    <div class="alert alert-danger" role="alert" invisible="state != 'Deleted'">
+                        <strong>This declaration has been marked as deleted.</strong>
+                        <field name="deleted_date" readonly="1"/>
+                    </div>
+                    
                     <group>
                         <group>
                             <field name="cashier_name"/>
@@ -113,7 +164,7 @@
                             <field name="total"/>
                             <field name="cashup_z_reading"/>
                             <field name="variance" decoration-danger="variance != 0" decoration-muted="variance == 0"/>
-                            <!-- <field name="verified_date" readonly="1" invisible="state == 'Draft'"/> -->
+                            <field name="verified_date" readonly="1" invisible="state == 'Draft'"/>
                         </group>
                     </group>
                     <group>
@@ -125,10 +176,10 @@
                     </group>
                     <notebook>
                         <page string="Declarations">
-                            <field name="declaration_lines" nolabel="1" readonly="1">
-                                <list editable="top">
-                                    <field name="declaration_type_ids"/>
-                                    <field name="currency_id"/>
+                            <field name="declaration_lines" nolabel="1" create="false" edit="false" readonly="state in ['Cancelled', 'Deleted', 'Closed']">
+                                <list editable="top" create="false">
+                                    <field name="declaration_type_ids" readonly="1"/>
+                                    <field name="currency_id" readonly="1"/>
                                     <field name="amount" options="{'currency_field': 'currency_id'}"/>
                                     <field name="exchange_rate"/>
                                     <field name="currency_usd" column_invisible="1"/>
@@ -154,6 +205,7 @@
         <field name="res_model">stream_cash.declarations</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_declarations_search"/>
+        <field name="context">{'search_default_filter_active': 1}</field>
     </record>
 
     <!-- Menu -->
@@ -165,7 +217,7 @@
               parent="stream_cash_menu_root"
               action="action_declarations"/>
 
-    <!-- Bulk Close Server Action -->
+    <!-- EXISTING Bulk Close Server Action -->
     <record id="action_bulk_close_declarations" model="ir.actions.server">
         <field name="name">Bulk Close Declarations</field>
         <field name="model_id" ref="model_stream_cash_declarations"/>
@@ -174,6 +226,30 @@
         <field name="state">code</field>
         <field name="code">
             env['stream_cash.declarations'].browse(env.context.get('active_ids')).action_bulk_close()
+        </field>
+    </record>
+
+    <!-- NEW Bulk Cancel Server Action -->
+    <record id="action_bulk_cancel_declarations" model="ir.actions.server">
+        <field name="name">Bulk Cancel Declarations</field>
+        <field name="model_id" ref="model_stream_cash_declarations"/>
+        <field name="binding_model_id" ref="model_stream_cash_declarations"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+            env['stream_cash.declarations'].browse(env.context.get('active_ids')).action_bulk_cancel()
+        </field>
+    </record>
+
+    <!-- NEW Bulk Delete Server Action -->
+    <record id="action_bulk_delete_declarations" model="ir.actions.server">
+        <field name="name">Bulk Delete Declarations</field>
+        <field name="model_id" ref="model_stream_cash_declarations"/>
+        <field name="binding_model_id" ref="model_stream_cash_declarations"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+            env['stream_cash.declarations'].browse(env.context.get('active_ids')).action_bulk_delete()
         </field>
     </record>
 

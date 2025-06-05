@@ -13,7 +13,10 @@ class StreamCashAppModel(models.Model):
     manager_name = fields.Many2one('hr.employee',string="Manager",domain="[('job_id.name', '=', 'Manager')]")
 
     date = fields.Datetime(string='Date', default=fields.Datetime.now)
-    verified_date = fields.Datetime(string='Verified Date')  # NEW FIELD
+    verified_date = fields.Datetime(string='Verified Date')
+    cancelled_date = fields.Datetime(string='Cancelled Date')  # NEW FIELD
+    deleted_date = fields.Datetime(string='Deleted Date')      # NEW FIELD
+    
     total_declared = fields.Float(string="Total Declared")
     wrong_tenders_or_comments = fields.Text(string="Wrong Tenders / Comments")
     cashup_z_reading = fields.Float(string="Cashup Z Reading (USD)", required=True)
@@ -37,9 +40,16 @@ class StreamCashAppModel(models.Model):
     total = fields.Float(string="Total (USD)", compute="_compute_all_totals", store=True)
     other_declarations_total = fields.Float(string="Other Declarations Total", compute="_compute_all_totals", store=True)
 
+    # UPDATED STATE FIELD - Added Cancelled and Deleted
     state = fields.Selection(
         string='Status',
-        selection=[('Draft', 'Draft'), ('Verified', 'Verified'), ('Closed', 'Closed')],
+        selection=[
+            ('Draft', 'Draft'), 
+            ('Verified', 'Verified'), 
+            ('Closed', 'Closed'),
+            ('Cancelled', 'Cancelled'),  # NEW STATUS
+            ('Deleted', 'Deleted')       # NEW STATUS
+        ],
         default='Draft')
 
     declaration_lines = fields.One2many('stream_cash.declaration.line', 'declaration_id', string="Declaration Lines")
@@ -166,7 +176,7 @@ class StreamCashAppModel(models.Model):
         if self.state != 'Draft':
             raise UserError("Can only verify declarations in Draft state")
         self.state = 'Verified'
-        self.verified_date = fields.Datetime.now()  # SET VERIFIED DATE
+        self.verified_date = fields.Datetime.now()
 
     def action_close(self):
         self.ensure_one()
@@ -174,10 +184,28 @@ class StreamCashAppModel(models.Model):
             raise UserError("Can only close declarations in Verified state")
         self.state = 'Closed'
 
+    # NEW ACTION: Cancel Declaration
+    def action_cancel(self):
+        self.ensure_one()
+        if self.state in ['Cancelled', 'Deleted']:
+            raise UserError("Cannot cancel a declaration that is already cancelled or deleted")
+        self.state = 'Cancelled'
+        self.cancelled_date = fields.Datetime.now()
+
+    # NEW ACTION: Mark as Deleted
+    def action_delete(self):
+        self.ensure_one()
+        if self.state == 'Deleted':
+            raise UserError("Declaration is already marked as deleted")
+        self.state = 'Deleted'
+        self.deleted_date = fields.Datetime.now()
+
     def action_reset_to_draft(self):
         self.ensure_one()
         self.state = 'Draft'
-        self.verified_date = False  # CLEAR VERIFIED DATE WHEN RESET
+        self.verified_date = False
+        self.cancelled_date = False  # CLEAR CANCELLED DATE WHEN RESET
+        self.deleted_date = False    # CLEAR DELETED DATE WHEN RESET
 
     def action_bulk_close(self):
         for record in self:
@@ -185,3 +213,24 @@ class StreamCashAppModel(models.Model):
                 record.write({'state': 'Closed'})
             else:
                 raise UserError(f"Declaration {record._name or record.id} is not in 'Verified' state.")
+
+    # NEW BULK ACTION: Bulk Cancel
+    def action_bulk_cancel(self):
+        for record in self:
+            if record.state not in ['Cancelled', 'Deleted']:
+                record.write({
+                    'state': 'Cancelled',
+                    'cancelled_date': fields.Datetime.now()
+                })
+
+    # NEW BULK ACTION: Bulk Delete
+    def action_bulk_delete(self):
+        for record in self:
+            record.write({
+                'state': 'Deleted',
+                'deleted_date': fields.Datetime.now()
+            })
+
+    # OVERRIDE unlink to prevent physical deletion
+    def unlink(self):
+        raise UserError("Physical deletion is not allowed. Use 'Cancel' or 'Delete' status instead.")
