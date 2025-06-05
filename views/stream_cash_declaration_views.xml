@@ -113,7 +113,7 @@
                             <field name="total"/>
                             <field name="cashup_z_reading"/>
                             <field name="variance" decoration-danger="variance != 0" decoration-muted="variance == 0"/>
-                            <field name="verified_date" readonly="1" invisible="state == 'Draft'"/>
+                            <!-- <field name="verified_date" readonly="1" invisible="state == 'Draft'"/> -->
                         </group>
                     </group>
                     <group>

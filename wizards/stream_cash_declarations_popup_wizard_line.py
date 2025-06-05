@@ -7,6 +7,7 @@ class CashDeclarationWizardLine(models.TransientModel):
 
     stream_cash_declarations_popup_wizard_id = fields.Many2one('stream_cash_declarations_popup.wizard', string="Wizard", required=True, ondelete='cascade')
     amount = fields.Monetary(string="Amount")
+    display_amount = fields.Monetary(string="Display Amount", compute="_compute_display_amount", store=True)
     currency_id = fields.Many2one(string="Currency", related='stream_cash_declarations_popup_wizard_id.currency_id')
     exchange_rate = fields.Float(string="Exchange Rate", related='stream_cash_declarations_popup_wizard_id.currency_id.rate', readonly=True,digits=(12,6))
     currency_usd = fields.Many2one('res.currency', string="Base Currency", default=lambda self: self.env.company.currency_id)
@@ -24,15 +25,35 @@ class CashDeclarationWizardLine(models.TransientModel):
     # New transaction type field
     transaction_type_id = fields.Many2one('stream_cash_transaction.type', string="Transaction Type")
 
-    
-    
     # credit notes fields
     partner_id = fields.Many2one('res.partner', string='Account Name')
-    
-    
-    
 
-    @api.depends('count', 'stream_cash_declarations_popup_wizard_id', 'amount')
+    def _should_negate_amount(self):
+        """
+        Determine if amount should be negated based on hierarchical logic:
+        1. First check transaction type's is_negate
+        2. Then check declaration type's is_negate
+        """
+        # First priority: transaction type negation
+        if self.transaction_type_id and self.transaction_type_id.is_negate:
+            return True
+        
+        # Second priority: declaration type negation (only if no transaction type negation)
+        if not (self.transaction_type_id and self.transaction_type_id.is_negate):
+            return self.stream_cash_declarations_popup_wizard_id.related_is_negate
+        
+        return False
+
+    @api.depends('amount', 'transaction_type_id', 'stream_cash_declarations_popup_wizard_id.related_is_negate')
+    def _compute_display_amount(self):
+        for record in self:
+            record.display_amount = record.amount
+            
+            # Apply hierarchical negation logic using your existing pattern
+            if record._should_negate_amount():
+                record.display_amount = record.display_amount * -1
+
+    @api.depends('count', 'stream_cash_declarations_popup_wizard_id', 'amount', 'transaction_type_id')
     def _compute_amount_usd(self):
         for record in self:
             if record.stream_cash_declarations_popup_wizard_id.currency_id and record.currency_usd:
@@ -45,10 +66,9 @@ class CashDeclarationWizardLine(models.TransientModel):
             else:
                 record.amount_usd = 0.0
 
-            if record.stream_cash_declarations_popup_wizard_id.related_is_negate == True:
+            # Apply hierarchical negation logic using your existing pattern
+            if record._should_negate_amount():
                 record.amount_usd = record.amount_usd * -1
-
-            print(record.stream_cash_declarations_popup_wizard_id.related_is_negate) 
 
     @api.onchange('amount')
     def _onchange_amount(self):

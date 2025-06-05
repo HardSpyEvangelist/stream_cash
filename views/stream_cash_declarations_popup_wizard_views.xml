@@ -19,29 +19,40 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Declaration lines"  >
+                        <page string="Declaration lines">
                              <field name="line_ids" nolabel="1">
-                                <list editable="bottom" delete="false" >
+                                <list editable="bottom" delete="false">
                                     <field name="partner_id" width="80px" force_save="1" column_invisible="parent.related_is_partner == False"/>
                                     <field name="transaction_type_id" width="120px" force_save="1" 
                                             column_invisible="parent.related_is_cash == True or parent.related_is_partner == True"
                                             domain="[('declaration_type_id', '=', parent.declaration_type_ids)]"
                                             options="{'no_create': True, 'no_open': True}"/>
-                                    <field name="denomination_id" force_save="1" readonly="1"  column_invisible="1"/>
-                                    <field name="denomination_name" width="80px"  force_save="1" readonly="1"  column_invisible ="parent.related_is_cash == False"/>
-                                    <field name="denomination_value"  force_save="1" readonly="1" column_invisible ="parent.related_is_cash == False"/>
-                                    <field name="count" force_save="1"  column_invisible ="parent.related_is_cash == False"/>
-                                    <field name="currency_id"  force_save="1" column_invisible="1"/>
-                                    <field name="currency_usd"  force_save="1" column_invisible="1"/>
-                                    <field name="amount" readonly="parent.related_is_cash == True" force_save="1" options="{'currency_field': 'currency_id'}" sum="total"/>
-                                    <field name="exchange_rate"  force_save="1" readonly="1"/>
-                                    <field name="amount_usd" readonly="1"  force_save="1" options="{'currency_field': 'currency_usd'} " sum="total"/>
+                                    <field name="denomination_id" force_save="1" readonly="1" column_invisible="1"/>
+                                    <field name="denomination_name" width="80px" force_save="1" readonly="1" column_invisible="parent.related_is_cash == False"/>
+                                    <field name="denomination_value" force_save="1" readonly="1" column_invisible="parent.related_is_cash == False"/>
+                                    <field name="count" force_save="1" column_invisible="parent.related_is_cash == False"/>
+                                    <field name="currency_id" force_save="1" column_invisible="1"/>
+                                    <field name="currency_usd" force_save="1" column_invisible="1"/>
+                                    <field name="amount" readonly="parent.related_is_cash == True" force_save="1" 
+                                           options="{'currency_field': 'currency_id'}" sum="total"
+                                           decoration-danger="display_amount &lt; 0"/>
+                                    <field name="display_amount" column_invisible="1"/>
+                                    <field name="exchange_rate" force_save="1" readonly="1"/>
+                                    <field name="amount_usd" readonly="1" force_save="1" 
+                                           options="{'currency_field': 'currency_usd'}" sum="total"
+                                           decoration-danger="amount_usd &lt; 0"/>
                                 </list>
                             </field>
                         </page>
-
-
                     </notebook>
+                    <div class="oe_clear"/>
+                    <group>
+                        <group>
+                            <!-- <field name="total_amount" readonly="1"  -->
+                                   <!-- decoration-danger="total_amount &lt; 0" -->
+                                   <!-- widget="monetary" options="{'currency_field': 'currency_id'}"/> -->
+                        </group>
+                    </group>
                 </sheet>
                 <footer>
                     <button string="Save" name="action_save" type="object" class="btn-primary"/>

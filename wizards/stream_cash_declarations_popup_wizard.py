@@ -19,7 +19,23 @@ class CashDeclarationWizard(models.TransientModel):
     total_amount = fields.Float(string="Total Amount", compute="_compute_total_amount", store=True)
     total_amount_usd = fields.Float(string="Total Amount (USD)", store=True)
 
-   
+    def _get_line_amount_with_negation(self, line):
+        """
+        Get line amount with hierarchical negation logic applied
+        """
+        base_amount = line.amount
+        
+        # First priority: transaction type negation
+        if line.transaction_type_id and line.transaction_type_id.is_negate:
+            return -abs(base_amount)  # Always enforce negative
+        
+        # Second priority: declaration type negation (only if no transaction type negation)
+        if not (line.transaction_type_id and line.transaction_type_id.is_negate):
+            if self.related_is_negate:
+                return -abs(base_amount)  # Always enforce negative
+        
+        return abs(base_amount)  # Always enforce positive
+
     @api.onchange('currency_id', 'declaration_type_ids')
     def _onchange_currency_id(self):
         if self.currency_id and self.declaration_type_ids:
@@ -80,7 +96,6 @@ class CashDeclarationWizard(models.TransientModel):
             
             self.line_ids = line_vals
 
-
     def action_save(self):
         declaration_notes = []
         cash_amount = 0
@@ -101,11 +116,7 @@ class CashDeclarationWizard(models.TransientModel):
                     # Store individual line with positive amount for cash impact
                     amount = rec.amount
                 else:
-                    amount = rec.amount
-                
-                # Apply negate logic if needed
-                if self.related_is_negate:
-                    amount = -amount
+                    amount = self._get_line_amount_with_negation(rec)
                 
                 # Create the note line with the correct cash impact amount
                 line_note = {
@@ -118,22 +129,27 @@ class CashDeclarationWizard(models.TransientModel):
                 }
                 declaration_notes.append((0, 0, line_note))
             
-            # Calculate the net cash amount (this is already correct)
-            cash_amount = vouchers_redeemed - vouchers_issued
-            if self.related_is_negate:
-                cash_amount = -cash_amount
+            # Calculate the net cash amount using hierarchical negation
+            net_vouchers_issued = 0
+            net_vouchers_redeemed = 0
+            
+            for rec in self.line_ids:
+                if rec.transaction_type_id and rec.transaction_type_id.name == 'Issued':
+                    net_vouchers_issued += self._get_line_amount_with_negation(rec)
+                elif rec.transaction_type_id and rec.transaction_type_id.name == 'Redeemed':
+                    net_vouchers_redeemed += self._get_line_amount_with_negation(rec)
+            
+            cash_amount = net_vouchers_redeemed + net_vouchers_issued  # Both already have correct signs
                 
         else:
             # Regular handling for non-voucher declaration types
             for rec in self.line_ids:
-                line_note = {}  # Always define fresh
-
-                amount = -rec.amount if self.related_is_negate else rec.amount  #  Apply negate logic
+                amount = self._get_line_amount_with_negation(rec)
 
                 if rec.stream_cash_declarations_popup_wizard_id.related_is_cash:
                     if rec.count > 0:
                         line_note = {
-                            'amount': amount,  #  Store the possibly negative amount
+                            'amount': amount,
                             'currency_id': rec.currency_id.id,
                             'count': rec.count,
                             'denomination_id': rec.denomination_id.id,
@@ -141,10 +157,10 @@ class CashDeclarationWizard(models.TransientModel):
                             'partner_id': rec.partner_id.id if rec.partner_id else False,
                         }
                         declaration_notes.append((0, 0, line_note))
-                        cash_amount += amount  #  Add possibly negative amount
+                        cash_amount += amount
                 else:
                     line_note = {
-                        'amount': amount,  #  Same for non-cash
+                        'amount': amount,
                         'currency_id': rec.currency_id.id,
                         'count': rec.count,
                         'denomination_id': rec.denomination_id.id if rec.denomination_id else False,
@@ -152,7 +168,7 @@ class CashDeclarationWizard(models.TransientModel):
                         'partner_id': rec.partner_id.id if rec.partner_id else False,
                     }
                     declaration_notes.append((0, 0, line_note))
-                    cash_amount += amount  #  Again, add possibly negative
+                    cash_amount += amount
 
         self.env['stream_cash.declaration.line'].create({
             'declaration_id': self.declaration_id.id,
@@ -164,23 +180,18 @@ class CashDeclarationWizard(models.TransientModel):
 
         return {'type': 'ir.actions.act_window_close'}
 
-    @api.depends('line_ids.amount')
+    @api.depends('line_ids.amount', 'line_ids.transaction_type_id')
     def _compute_total_amount(self):
         for wizard in self:
             if wizard.declaration_type_name == 'Voucher':
-                # For vouchers, calculate net amount (redeemed - issued)
-                vouchers_issued = 0
-                vouchers_redeemed = 0
-                
+                # For vouchers, calculate net amount with hierarchical negation
+                total = 0
                 for line in wizard.line_ids:
-                    if line.transaction_type_id and line.transaction_type_id.name == 'Issued':
-                        vouchers_issued += line.amount
-                    elif line.transaction_type_id and line.transaction_type_id.name == 'Redeemed':
-                        vouchers_redeemed += line.amount
-                
-                net_amount = vouchers_redeemed - vouchers_issued
-                wizard.total_amount = -net_amount if wizard.related_is_negate else net_amount
+                    total += wizard._get_line_amount_with_negation(line)
+                wizard.total_amount = total
             else:
-                # For non-vouchers, sum all line amounts
-                total = sum(line.amount for line in wizard.line_ids)
-                wizard.total_amount = -total if wizard.related_is_negate else total
+                # For non-vouchers, sum all line amounts with hierarchical negation
+                total = 0
+                for line in wizard.line_ids:
+                    total += wizard._get_line_amount_with_negation(line)
+                wizard.total_amount = total
