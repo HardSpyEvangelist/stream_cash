@@ -7,14 +7,13 @@ class StreamCashAppModel(models.Model):
     _description = "Stream Cash Declarations"
     _rec_name = 'cashier_name'
 
-
-    
     cashier_name = fields.Many2one('hr.employee',string='Cashier',domain="[('job_id.name', '=', 'Cashier')]")
     cashier_number = fields.Char(string="Cashier Number", related='cashier_name.employee_cashier_number', store=True)
     supervisor_name = fields.Many2one('hr.employee',string="Supervisor",domain="[('job_id.name', '=', 'Supervisor')]")
     manager_name = fields.Many2one('hr.employee',string="Manager",domain="[('job_id.name', '=', 'Manager')]")
 
     date = fields.Datetime(string='Date', default=fields.Datetime.now)
+    verified_date = fields.Datetime(string='Verified Date')  # NEW FIELD
     total_declared = fields.Float(string="Total Declared")
     wrong_tenders_or_comments = fields.Text(string="Wrong Tenders / Comments")
     cashup_z_reading = fields.Float(string="Cashup Z Reading (USD)")
@@ -167,6 +166,7 @@ class StreamCashAppModel(models.Model):
         if self.state != 'Draft':
             raise UserError("Can only verify declarations in Draft state")
         self.state = 'Verified'
+        self.verified_date = fields.Datetime.now()  # SET VERIFIED DATE
 
     def action_close(self):
         self.ensure_one()
@@ -177,6 +177,7 @@ class StreamCashAppModel(models.Model):
     def action_reset_to_draft(self):
         self.ensure_one()
         self.state = 'Draft'
+        self.verified_date = False  # CLEAR VERIFIED DATE WHEN RESET
 
     def action_bulk_close(self):
         for record in self:

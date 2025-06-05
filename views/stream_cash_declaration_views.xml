@@ -39,27 +39,36 @@
         </field>
     </record>
 
-    <!-- Valid Search View with Filters and Group By -->
-  <record id="view_declarations_search" model="ir.ui.view">
-    <field name="name">stream_cash.declarations.search</field>
-    <field name="model">stream_cash.declarations</field>
-    <field name="arch" type="xml">
-        <search string="Search Declarations">
-            <!-- ONLY filters allowed in older Odoo versions -->
-            <filter name="filter_draft" string="Draft" domain="[('state','=','Draft')]"/>
-            <filter name="filter_verified" string="Verified" domain="[('state','=','Verified')]"/>
-            <filter name="filter_closed" string="Closed" domain="[('state','=','Closed')]"/>
+    <!-- Updated Search View with New Today Filters -->
+    <record id="view_declarations_search" model="ir.ui.view">
+        <field name="name">stream_cash.declarations.search</field>
+        <field name="model">stream_cash.declarations</field>
+        <field name="arch" type="xml">
+            <search string="Search Declarations">
+                <!-- EXISTING FILTERS (unchanged) -->
+                <filter name="filter_draft" string="Draft" domain="[('state','=','Draft')]"/>
+                
+                <!-- NEW: Draft Today Filter -->
+                <filter name="filter_draft_today" string="Draft Today" 
+                        domain="[('state','=','Draft'),('date','&gt;=',datetime.datetime.combine(context_today(),datetime.time(0,0,0))),('date','&lt;=',datetime.datetime.combine(context_today(),datetime.time(23,59,59)))]"/>
+                
+                <filter name="filter_verified" string="Verified" domain="[('state','=','Verified')]"/>
+                
+                <!-- NEW: Verified Today Filter -->
+                <filter name="filter_verified_today" string="Verified Today" 
+                        domain="[('state','=','Verified'),('verified_date','&gt;=',datetime.datetime.combine(context_today(),datetime.time(0,0,0))),('verified_date','&lt;=',datetime.datetime.combine(context_today(),datetime.time(23,59,59)))]"/>
+                
+                <filter name="filter_closed" string="Closed" domain="[('state','=','Closed')]"/>
 
-            <separator/>
+                <separator/>
 
-            <group expand="0" string="Group By">
-                <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
-                <filter name="group_cashier" string="Cashier" context="{'group_by': 'cashier_name'}"/>
-            </group>
-        </search>
-    </field>
-</record>
-
+                <group expand="0" string="Group By">
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_cashier" string="Cashier" context="{'group_by': 'cashier_name'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
 
     <!-- Form View -->
     <record id="view_declarations_form" model="ir.ui.view">
@@ -104,6 +113,7 @@
                             <field name="total"/>
                             <field name="cashup_z_reading"/>
                             <field name="variance" decoration-danger="variance != 0" decoration-muted="variance == 0"/>
+                            <field name="verified_date" readonly="1" invisible="state == 'Draft'"/>
                         </group>
                     </group>
                     <group>
@@ -166,7 +176,5 @@
             env['stream_cash.declarations'].browse(env.context.get('active_ids')).action_bulk_close()
         </field>
     </record>
-
-    
 
 </odoo>
