@@ -22,8 +22,11 @@ class CashDeclarationWizard(models.TransientModel):
    
     @api.onchange('currency_id', 'declaration_type_ids')
     def _onchange_currency_id(self):
-        if self.currency_id:
+        if self.currency_id and self.declaration_type_ids:
             self.line_ids = [(5, 0, 0)]  # Clear existing lines
+            line_vals = []
+            
+            # Handle cash denominations (existing logic)
             if self.related_is_cash:
                 denominations = self.env['currency.denomination'].search([
                     ('currency_id', '=', self.currency_id.id),
@@ -32,14 +35,48 @@ class CashDeclarationWizard(models.TransientModel):
                 # Custom sort: put <XXX at the top, then sort by value
                 denominations = sorted(denominations, key=lambda d: (0 if d.name.startswith('<') else 1, d.value))
 
-                line_vals = []
                 for denomination in denominations:
                     line_vals.append((0, 0, {
                         'denomination_id': denomination.id,
                         'count': 0,
                         'exchange_rate': self.currency_id.rate or 1.0
                     }))
-                self.line_ids = line_vals
+            
+            # Handle transaction types (new dynamic logic)
+            transaction_types = self.env['stream_cash_transaction.type'].search([
+                ('declaration_type_id', '=', self.declaration_type_ids.id),
+                ('active', '=', True)
+            ], order='sequence, name')
+            
+            # Special handling for Credit Card - filter by currency (ENHANCED VERSION)
+            if transaction_types and self.declaration_type_name == 'Credit Card':
+                currency_code = self.currency_id.name  # USD, ZWG, GBP, etc.
+                # Handle special case: ZWG currency uses "ZiG" in transaction type names
+                search_term = 'ZiG' if currency_code == 'ZWG' else currency_code
+                
+                # ENHANCED: Case-insensitive, position-independent matching
+                transaction_types = transaction_types.filtered(
+                    lambda t: search_term.upper() in t.name.upper()
+                )
+            
+            if transaction_types:
+                for transaction_type in transaction_types:
+                    line_vals.append((0, 0, {
+                        'transaction_type_id': transaction_type.id,
+                        'amount': 0.0,
+                        'count': 0,
+                        'exchange_rate': self.currency_id.rate or 1.0
+                    }))
+            
+            # If neither cash nor transaction types exist, create one empty line
+            if not self.related_is_cash and not transaction_types:
+                line_vals.append((0, 0, {
+                    'amount': 0.0,
+                    'count': 0,
+                    'exchange_rate': self.currency_id.rate or 1.0
+                }))
+            
+            self.line_ids = line_vals
 
 
     def action_save(self):
