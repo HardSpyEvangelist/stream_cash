@@ -40,6 +40,13 @@ class StreamCashAppModel(models.Model):
     total = fields.Float(string="Total (USD)", compute="_compute_all_totals", store=True)
     other_declarations_total = fields.Float(string="Other Declarations Total", compute="_compute_all_totals", store=True)
 
+    currency_usd = fields.Many2one(
+        'res.currency',
+        string="Base Currency", 
+        help="This field ensures compatibility with monetary fields",
+        default=lambda self: self.env.company.currency_id
+    )
+
     # UPDATED STATE FIELD - Added Cancelled and Deleted
     state = fields.Selection(
         string='Status',

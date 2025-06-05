@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Report Action -->
+ <record id="action_cash_declaration_report" model="ir.actions.report">
+    <field name="name">Cash Declaration Report</field>
+    <field name="model">stream_cash.declarations</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">stream_cash.cash_declaration_report_template</field>
+    <field name="report_file">stream_cash.cash_declaration_report_template</field>
+    <field name="binding_model_id" ref="model_stream_cash_declarations"/>
+    <field name="binding_type">report</field>
+</record>
+
+    <!-- Report Template -->
+    <template id="cash_declaration_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="declaration">
+                <div class="page">
+                    <!-- Header -->
+                    <div class="header" style="border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px;">
+                        <div class="row">
+                            <div class="col-6">
+                                <h2>Cash Declaration Report</h2>
+                                <p><strong>Declaration ID:</strong> <span t-field="declaration.id"/></p>
+                                <p><strong>Date:</strong> <span t-field="declaration.date" t-options='{"widget": "datetime"}'/></p>
+                                <p><strong>Status:</strong> 
+                                    <span t-field="declaration.state" 
+                                          t-attf-class="badge #{'badge-info' if declaration.state == 'Draft' else 'badge-warning' if declaration.state == 'Verified' else 'badge-success' if declaration.state == 'Closed' else 'badge-secondary' if declaration.state == 'Cancelled' else 'badge-danger'}"/>
+                                </p>
+                            </div>
+                            <div class="col-6 text-right">
+                                <p><strong>Cashier:</strong> <span t-field="declaration.cashier_name.name"/></p>
+                                <p><strong>Cashier Number:</strong> <span t-field="declaration.cashier_number"/></p>
+                                <p><strong>Supervisor:</strong> <span t-field="declaration.supervisor_name.name"/></p>
+                                <p><strong>Manager:</strong> <span t-field="declaration.manager_name.name"/></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Financial Summary -->
+                    <div style="margin-bottom: 20px;">
+                        <h3>Financial Summary</h3>
+                        <table class="table table-bordered">
+                            <tr>
+                                <td><strong>Cashup Z Reading (USD)</strong></td>
+                                <td class="text-right"><span t-field="declaration.cashup_z_reading" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td>
+                                <td><strong>Total Declared (USD)</strong></td>
+                                <td class="text-right"><span t-field="declaration.total" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Variance</strong></td>
+                                <td class="text-right" t-attf-style="color: #{declaration.variance != 0 and 'red' or 'black'};">
+                                    <span t-field="declaration.variance" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/>
+                                </td>
+                                <td><strong>Cash Floats</strong></td>
+                                <td class="text-right"><span t-field="declaration.cash_floats" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Breakdown by Category -->
+                    <div style="margin-bottom: 20px;">
+                        <h3>Category Breakdown</h3>
+                        <div class="row">
+                            <div class="col-6">
+                                <table class="table table-sm table-bordered">
+                                    <tr><td>Cash (Excl. Floats)</td><td class="text-right"><span t-field="declaration.cash_excl_floats" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
+                                    <tr><td>Accounts</td><td class="text-right"><span t-field="declaration.accounts" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
+                                    <tr><td>Credit Notes</td><td class="text-right"><span t-field="declaration.credit_notes" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
+                                    <tr><td>Pickup Cash</td><td class="text-right"><span t-field="declaration.pickups_cash" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
+                                    <tr><td>Payment Out</td><td class="text-right"><span t-field="declaration.payment_out" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <table class="table table-sm table-bordered">
+                                    <tr><td>USD EFT</td><td class="text-right"><span t-field="declaration.usd_eft" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
+                                    <tr><td>USD Offline</td><td class="text-right"><span t-field="declaration.usd_offline" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
+                                    <tr><td>ZiG EFT</td><td class="text-right"><span t-field="declaration.zig_eft" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
+                                    <tr><td>ZiG Offline</td><td class="text-right"><span t-field="declaration.zig_offline" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
+                                    <tr><td>Vouchers Issued</td><td class="text-right"><span t-field="declaration.vouchers_issued" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
+                                    <tr><td>Vouchers Redeemed</td><td class="text-right"><span t-field="declaration.vouchers_redeemed" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comments -->
+                    <t t-if="declaration.wrong_tenders_or_comments">
+                        <div style="margin-bottom: 20px;">
+                            <h4>Comments/Wrong Tenders</h4>
+                            <p><span t-field="declaration.wrong_tenders_or_comments"/></p>
+                        </div>
+                    </t>
+
+                    <!-- Declaration Lines Detail -->
+                    <div style="margin-bottom: 20px;">
+                        <h3>Declaration Lines Detail</h3>
+                        <t t-foreach="declaration.declaration_lines" t-as="line">
+                            <div style="margin-bottom: 15px; border: 1px solid #ddd; padding: 10px;">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <h5><span t-field="line.declaration_type_name"/></h5>
+                                        <p><strong>Currency:</strong> <span t-field="line.currency_id.name"/> | 
+                                           <strong>Exchange Rate:</strong> <span t-field="line.exchange_rate" t-options='{"precision": 6}'/></p>
+                                    </div>
+                                    <div class="col-4 text-right">
+                                        <p><strong>Amount:</strong> 
+                                            <t t-if="line.currency_id">
+                                                <span t-field="line.amount" t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
+                                            </t>
+                                            <t t-else="">
+                                                <span t-field="line.amount" t-options='{"widget": "float", "precision": 2}'/>
+                                            </t>
+                                        </p>
+                                        <p><strong>Amount USD:</strong> <span t-field="line.amount_usd" t-options='{"widget": "monetary", "display_currency": line.currency_usd}'/></p>
+                                    </div>
+                                </div>
+
+                                <!-- Line Notes Detail -->
+                                <t t-if="line.declaration_notes_line_ids">
+                                    <h6>Transaction Details:</h6>
+                                    <table class="table table-sm table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th t-if="line.related_is_partner">Partner</th>
+                                                <th t-if="not line.related_is_cash and not line.related_is_partner">Transaction Type</th>
+                                                <th t-if="line.related_is_cash">Denomination</th>
+                                                <th t-if="line.related_is_cash">Count</th>
+                                                <th>Currency</th>
+                                                <th>Amount</th>
+                                                <th>Amount USD</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="line.declaration_notes_line_ids" t-as="note">
+                                                <tr>
+                                                    <td t-if="line.related_is_partner"><span t-field="note.partner_id.name"/></td>
+                                                    <td t-if="not line.related_is_cash and not line.related_is_partner"><span t-field="note.transaction_type_id.name"/></td>
+                                                    <td t-if="line.related_is_cash"><span t-field="note.denomination_name"/></td>
+                                                    <td t-if="line.related_is_cash"><span t-field="note.count"/></td>
+                                                    <td><span t-field="note.currency_id.name"/></td>
+                                                    <td t-attf-style="color: #{note.amount &lt; 0 and 'red' or 'black'};">
+                                                        <t t-if="note.currency_id">
+                                                            <span t-field="note.amount" t-options='{"widget": "monetary", "display_currency": note.currency_id}'/>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <span t-field="note.amount" t-options='{"widget": "float", "precision": 2}'/>
+                                                        </t>
+                                                    </td>
+                                                    <td t-attf-style="color: #{note.amount_usd &lt; 0 and 'red' or 'black'};">
+                                                        <t t-if="note.currency_usd">
+                                                            <span t-field="note.amount_usd" t-options='{"widget": "monetary", "display_currency": note.currency_usd}'/>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <span t-field="note.amount_usd" t-options='{"widget": "float", "precision": 2}'/>
+                                                        </t>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </t>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Status Dates -->
+                    <div style="margin-top: 30px; border-top: 1px solid #ddd; padding-top: 15px;">
+                        <h4>Status History</h4>
+                        <div class="row">
+                            <div class="col-6">
+                                <p><strong>Created:</strong> <span t-field="declaration.create_date" t-options='{"widget": "datetime"}'/></p>
+                                <t t-if="declaration.verified_date">
+                                    <p><strong>Verified:</strong> <span t-field="declaration.verified_date" t-options='{"widget": "datetime"}'/></p>
+                                </t>
+                            </div>
+                            <div class="col-6">
+                                <t t-if="declaration.cancelled_date">
+                                    <p><strong>Cancelled:</strong> <span t-field="declaration.cancelled_date" t-options='{"widget": "datetime"}'/></p>
+                                </t>
+                                <t t-if="declaration.deleted_date">
+                                    <p><strong>Deleted:</strong> <span t-field="declaration.deleted_date" t-options='{"widget": "datetime"}'/></p>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>
