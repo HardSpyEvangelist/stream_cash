@@ -8,7 +8,7 @@ class CashDeclarationWizardLine(models.TransientModel):
     stream_cash_declarations_popup_wizard_id = fields.Many2one('stream_cash_declarations_popup.wizard', string="Wizard", required=True, ondelete='cascade')
     amount = fields.Monetary(string="Amount")
     currency_id = fields.Many2one(string="Currency", related='stream_cash_declarations_popup_wizard_id.currency_id')
-    exchange_rate = fields.Float(string="Exchange Rate", related='stream_cash_declarations_popup_wizard_id.currency_id.rate', readonly=True)
+    exchange_rate = fields.Float(string="Exchange Rate", related='stream_cash_declarations_popup_wizard_id.currency_id.rate', readonly=True,digits=(12,6))
     currency_usd = fields.Many2one('res.currency', string="Base Currency", default=lambda self: self.env.company.currency_id)
     company_id = fields.Many2one('res.company', string='Company', index=True, default=lambda self: self.env.company)
     amount_usd = fields.Monetary(string="Amount (USD)", compute="_compute_amount_usd", store=True)

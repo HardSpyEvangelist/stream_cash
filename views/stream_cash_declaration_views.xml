@@ -15,13 +15,13 @@
                 <field name="date"/>
                 <field name="cashier_number" width="150px"/>
                 <field name="cashier_name" width="150px"/>
-                <field name="cashup_z_reading" width="150px"/>
-                <field name="total" string="Actual Day's Total" width="150px"/>
+                <field name="cashup_z_reading" width="200px"/>
+                <field name="total" string="Actual Day's Total (USD)" width="180px"/>
                 <field name="variance" decoration-danger="variance != 0" decoration-muted="variance == 0"  width="150px"/>
-                <field name= "cash_floats" string="Floats" width="150px"/>
+                <field name= "cash_floats" string="Floats (USD)" width="150px"/>
                 <field name="cash_excl_floats" width="180px"/>
-                <field name="vouchers_issued" width="150px"/>
-                <field name="vouchers_redeemed" width="150px"/>
+                <field name="vouchers_issued" width="200px"/>
+                <field name="vouchers_redeemed" width="200px"/>
                 <field name="accounts" width="150px"/>
                 <field name="credit_notes" width="150px"/>
                 <field name="usd_eft" width="150px"/>
@@ -30,11 +30,11 @@
                 <field name="zig_offline" width="150px"/>
                 <!-- <field name="zar_eft" width="150px"/> -->
                 <!-- <field name="zar_offline" width="150px"/> -->
-                <field name="total_cards_total" width="150px"/>
+                <field name="total_cards_total" width="150px" string="Total Cards Total (USD)"/>
                 <field name="pickups_cash" width="150px"/>
-                <field name= "payment_out" width="150px"/>
+                <field name= "payment_out" width="130px" string="Payment Out (USD)"/>
                 <!-- <field name= "other_declarations_total"/> -->
-                <field name="total" width="150px"/>
+                <field name="total" width="130px"/>
             </list>
         </field>
     </record>

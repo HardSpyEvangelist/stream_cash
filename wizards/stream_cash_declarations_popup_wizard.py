@@ -28,7 +28,10 @@ class CashDeclarationWizard(models.TransientModel):
                 denominations = self.env['currency.denomination'].search([
                     ('currency_id', '=', self.currency_id.id),
                     ('active', '=', True)
-                ], order='value desc')
+                ])
+                # Custom sort: put <XXX at the top, then sort by value
+                denominations = sorted(denominations, key=lambda d: (0 if d.name.startswith('<') else 1, d.value))
+
                 line_vals = []
                 for denomination in denominations:
                     line_vals.append((0, 0, {
@@ -37,6 +40,7 @@ class CashDeclarationWizard(models.TransientModel):
                         'exchange_rate': self.currency_id.rate or 1.0
                     }))
                 self.line_ids = line_vals
+
 
     def action_save(self):
         declaration_notes = []

@@ -18,7 +18,7 @@ class StreamCashDeclarationLine(models.Model):
         compute='_compute_total_amount',
         store=True,
         currency_field='currency_usd')    
-    exchange_rate = fields.Float(string="Exchange Rate", related='currency_id.rate')
+    exchange_rate = fields.Float(string="Exchange Rate", related='currency_id.rate', digits=(12, 6))
     amount_usd = fields.Monetary(string="Amount (USD)", compute='_compute_amount_usd', store=True)
     denomination_id = fields.Many2one('currency.denomination', string='Denomination')
 
