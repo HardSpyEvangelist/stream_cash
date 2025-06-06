@@ -1,6 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 stream_cash.access_stream_cash_declarations,access_stream_cash_declarations,stream_cash.model_stream_cash_declarations,base.group_user,1,1,1,0
-stream_cash.access_manager,access_stream_cash_manager,stream_cash.model_stream_cash_declarations,stream_cash.group_streamcash_manager,1,1,1,1
+stream_cash.access_manager,access_stream_cash_manager,stream_cash.model_stream_cash_declarations,stream_cash.group_streamcash_manager,1,1,1,0
 stream_cash.access_supervisor,access_stream_cash_supervisor,stream_cash.model_stream_cash_declarations,stream_cash.group_streamcash_supervisor,1,1,0,0
 
 

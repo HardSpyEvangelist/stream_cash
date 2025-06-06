@@ -14,31 +14,32 @@ class StreamCashAppModel(models.Model):
 
     date = fields.Datetime(string='Date', default=fields.Datetime.now)
     verified_date = fields.Datetime(string='Verified Date')
-    cancelled_date = fields.Datetime(string='Cancelled Date')  # NEW FIELD
-    deleted_date = fields.Datetime(string='Deleted Date')      # NEW FIELD
+    cancelled_date = fields.Datetime(string='Cancelled Date')
+    deleted_date = fields.Datetime(string='Deleted Date')
     
     total_declared = fields.Float(string="Total Declared")
     wrong_tenders_or_comments = fields.Text(string="Wrong Tenders / Comments")
     cashup_z_reading = fields.Float(string="Cashup Z Reading (USD)", required=True)
-    variance = fields.Float(string="Variance (USD)", compute='_compute_variance')
+    variance = fields.Float(string="Variance (USD)", compute='_compute_variance', store=True)
 
-    cash_floats = fields.Integer(string='Floats (USD)',compute='_compute_all_totals')
-    cash_excl_floats = fields.Float(compute='_compute_all_totals', string='Cash Excl Floats (USD)', store=True)
-    accounts = fields.Float(compute='_compute_all_totals', string='Accounts (USD)', store=True)
-    credit_notes = fields.Float(compute='_compute_all_totals', string='Credit Notes (USD)', store=True)
-    usd_eft = fields.Float(string="Eft - USD", compute="_compute_all_totals", store=True)
-    usd_offline = fields.Float(string="Offline - USD", compute="_compute_all_totals", store=True)
-    zig_eft = fields.Float(string="Eft - ZiG", compute="_compute_all_totals", store=True)
-    zig_offline = fields.Float(string="Offline ZiG", compute="_compute_all_totals", store=True)
-    zar_eft = fields.Float(string="Eft - ZAR", compute="_compute_all_totals", store=True)
-    zar_offline = fields.Float(string="Offline - ZAR", compute="_compute_all_totals", store=True)
-    total_cards_total = fields.Float(compute='_compute_all_totals', string="Total Cards Total", store=True)
-    vouchers_issued = fields.Float(string="Vouchers Issued (USD)", compute="_compute_all_totals", store=True)
-    vouchers_redeemed = fields.Float(string="Vouchers Redeemed (USD)", compute="_compute_all_totals", store=True)
-    pickups_cash = fields.Float(compute='_compute_all_totals', string="Pickup Cash (USD)", store=True)
-    payment_out = fields.Integer(compute='_compute_all_totals', store=True)
-    total = fields.Float(string="Total (USD)", compute="_compute_all_totals", store=True)
-    other_declarations_total = fields.Float(string="Other Declarations Total", compute="_compute_all_totals", store=True)
+    # Computed fields - all with consistent compute_sudo and store settings
+    cash_floats = fields.Integer(string='Floats (USD)', compute='_compute_all_totals', store=True, compute_sudo=True)
+    cash_excl_floats = fields.Float(compute='_compute_all_totals', string='Cash Excl Floats (USD)', store=True, compute_sudo=True)
+    accounts = fields.Float(compute='_compute_all_totals', string='Accounts (USD)', store=True, compute_sudo=True)
+    credit_notes = fields.Float(compute='_compute_all_totals', string='Credit Notes (USD)', store=True, compute_sudo=True)
+    usd_eft = fields.Float(string="Eft - USD", compute="_compute_all_totals", store=True, compute_sudo=True)
+    usd_offline = fields.Float(string="Offline - USD", compute="_compute_all_totals", store=True, compute_sudo=True)
+    zig_eft = fields.Float(string="Eft - ZiG", compute="_compute_all_totals", store=True, compute_sudo=True)
+    zig_offline = fields.Float(string="Offline ZiG", compute="_compute_all_totals", store=True, compute_sudo=True)
+    zar_eft = fields.Float(string="Eft - ZAR", compute="_compute_all_totals", store=True, compute_sudo=True)
+    zar_offline = fields.Float(string="Offline - ZAR", compute="_compute_all_totals", store=True, compute_sudo=True)
+    total_cards_total = fields.Float(compute='_compute_all_totals', string="Total Cards Total", store=True, compute_sudo=True)
+    vouchers_issued = fields.Float(string="Vouchers Issued (USD)", compute="_compute_all_totals", store=True, compute_sudo=True)
+    vouchers_redeemed = fields.Float(string="Vouchers Redeemed (USD)", compute="_compute_all_totals", store=True, compute_sudo=True)
+    pickups_cash = fields.Float(compute='_compute_all_totals', string="Pickup Cash (USD)", store=True, compute_sudo=True)
+    payment_out = fields.Integer(compute='_compute_all_totals', store=True, compute_sudo=True)
+    total = fields.Float(string="Total (USD)", compute="_compute_all_totals", store=True, compute_sudo=True)
+    other_declarations_total = fields.Float(string="Other Declarations Total", compute="_compute_all_totals", store=True, compute_sudo=True)
 
     currency_usd = fields.Many2one(
         'res.currency',
@@ -47,15 +48,15 @@ class StreamCashAppModel(models.Model):
         default=lambda self: self.env.company.currency_id
     )
 
-    # UPDATED STATE FIELD - Added Cancelled and Deleted
+    # State field with new statuses
     state = fields.Selection(
         string='Status',
         selection=[
             ('Draft', 'Draft'), 
             ('Verified', 'Verified'), 
             ('Closed', 'Closed'),
-            ('Cancelled', 'Cancelled'),  # NEW STATUS
-            ('Deleted', 'Deleted')       # NEW STATUS
+            ('Cancelled', 'Cancelled'),
+            ('Deleted', 'Deleted')
         ],
         default='Draft')
 
@@ -149,9 +150,6 @@ class StreamCashAppModel(models.Model):
                         elif transaction_type_name == 'OFFLINE - ZAR':
                             zar_offline += note_amount
 
-            # No longer need to subtract vouchers issued and add vouchers redeemed
-            # because voucher line already contains the net amount
-
             cash_floats = total_float_lines
             cash_excl_floats = total_cash_lines + total_float_lines
 
@@ -191,7 +189,6 @@ class StreamCashAppModel(models.Model):
             raise UserError("Can only close declarations in Verified state")
         self.state = 'Closed'
 
-    # NEW ACTION: Cancel Declaration
     def action_cancel(self):
         self.ensure_one()
         if self.state in ['Cancelled', 'Deleted']:
@@ -199,7 +196,6 @@ class StreamCashAppModel(models.Model):
         self.state = 'Cancelled'
         self.cancelled_date = fields.Datetime.now()
 
-    # NEW ACTION: Mark as Deleted
     def action_delete(self):
         self.ensure_one()
         if self.state == 'Deleted':
@@ -211,8 +207,8 @@ class StreamCashAppModel(models.Model):
         self.ensure_one()
         self.state = 'Draft'
         self.verified_date = False
-        self.cancelled_date = False  # CLEAR CANCELLED DATE WHEN RESET
-        self.deleted_date = False    # CLEAR DELETED DATE WHEN RESET
+        self.cancelled_date = False
+        self.deleted_date = False
 
     def action_bulk_close(self):
         for record in self:
@@ -221,7 +217,6 @@ class StreamCashAppModel(models.Model):
             else:
                 raise UserError(f"Declaration {record._name or record.id} is not in 'Verified' state.")
 
-    # NEW BULK ACTION: Bulk Cancel
     def action_bulk_cancel(self):
         for record in self:
             if record.state not in ['Cancelled', 'Deleted']:
@@ -230,7 +225,6 @@ class StreamCashAppModel(models.Model):
                     'cancelled_date': fields.Datetime.now()
                 })
 
-    # NEW BULK ACTION: Bulk Delete
     def action_bulk_delete(self):
         for record in self:
             record.write({
@@ -238,6 +232,5 @@ class StreamCashAppModel(models.Model):
                 'deleted_date': fields.Datetime.now()
             })
 
-    # OVERRIDE unlink to prevent physical deletion
     def unlink(self):
         raise UserError("Physical deletion is not allowed. Use 'Cancel' or 'Delete' status instead.")

@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <!-- Report Action -->
- <record id="action_cash_declaration_report" model="ir.actions.report">
-    <field name="name">Cash Declaration Report</field>
-    <field name="model">stream_cash.declarations</field>
-    <field name="report_type">qweb-pdf</field>
-    <field name="report_name">stream_cash.cash_declaration_report_template</field>
-    <field name="report_file">stream_cash.cash_declaration_report_template</field>
-    <field name="binding_model_id" ref="model_stream_cash_declarations"/>
-    <field name="binding_type">report</field>
-</record>
+    <record id="action_cash_declaration_report" model="ir.actions.report">
+        <field name="name">Cash Declaration Report</field>
+        <field name="model">stream_cash.declarations</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">stream_cash.cash_declaration_report_template</field>
+        <field name="report_file">stream_cash.cash_declaration_report_template</field>
+        <field name="binding_model_id" ref="model_stream_cash_declarations"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_us"/>
+    </record>
 
     <!-- Report Template -->
     <template id="cash_declaration_report_template">
         <t t-call="web.html_container">
+            <t t-set="head">
+                <meta charset="UTF-8"/>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+            </t>
             <t t-foreach="docs" t-as="declaration">
                 <div class="page">
                     <!-- Header -->
@@ -43,17 +48,17 @@
                         <table class="table table-bordered">
                             <tr>
                                 <td><strong>Cashup Z Reading (USD)</strong></td>
-                                <td class="text-right"><span t-field="declaration.cashup_z_reading" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td>
+                                <td class="text-right">$<span t-esc="'{:,.2f}'.format(declaration.cashup_z_reading or 0)"/></td>
                                 <td><strong>Total Declared (USD)</strong></td>
-                                <td class="text-right"><span t-field="declaration.total" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td>
+                                <td class="text-right">$<span t-esc="'{:,.2f}'.format(declaration.total or 0)"/></td>
                             </tr>
                             <tr>
                                 <td><strong>Variance</strong></td>
                                 <td class="text-right" t-attf-style="color: #{declaration.variance != 0 and 'red' or 'black'};">
-                                    <span t-field="declaration.variance" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/>
+                                    $<span t-esc="'{:,.2f}'.format(declaration.variance or 0)"/>
                                 </td>
                                 <td><strong>Cash Floats</strong></td>
-                                <td class="text-right"><span t-field="declaration.cash_floats" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td>
+                                <td class="text-right">$<span t-esc="'{:,.2f}'.format(declaration.cash_floats or 0)"/></td>
                             </tr>
                         </table>
                     </div>
@@ -64,21 +69,21 @@
                         <div class="row">
                             <div class="col-6">
                                 <table class="table table-sm table-bordered">
-                                    <tr><td>Cash (Excl. Floats)</td><td class="text-right"><span t-field="declaration.cash_excl_floats" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
-                                    <tr><td>Accounts</td><td class="text-right"><span t-field="declaration.accounts" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
-                                    <tr><td>Credit Notes</td><td class="text-right"><span t-field="declaration.credit_notes" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
-                                    <tr><td>Pickup Cash</td><td class="text-right"><span t-field="declaration.pickups_cash" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
-                                    <tr><td>Payment Out</td><td class="text-right"><span t-field="declaration.payment_out" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
+                                    <tr><td>Cash (Excl. Floats)</td><td class="text-right">$<span t-esc="'{:,.2f}'.format(declaration.cash_excl_floats or 0)"/></td></tr>
+                                    <tr><td>Accounts</td><td class="text-right">$<span t-esc="'{:,.2f}'.format(declaration.accounts or 0)"/></td></tr>
+                                    <tr><td>Credit Notes</td><td class="text-right">$<span t-esc="'{:,.2f}'.format(declaration.credit_notes or 0)"/></td></tr>
+                                    <tr><td>Pickup Cash</td><td class="text-right">$<span t-esc="'{:,.2f}'.format(declaration.pickups_cash or 0)"/></td></tr>
+                                    <tr><td>Payment Out</td><td class="text-right">$<span t-esc="'{:,.2f}'.format(declaration.payment_out or 0)"/></td></tr>
                                 </table>
                             </div>
                             <div class="col-6">
                                 <table class="table table-sm table-bordered">
-                                    <tr><td>USD EFT</td><td class="text-right"><span t-field="declaration.usd_eft" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
-                                    <tr><td>USD Offline</td><td class="text-right"><span t-field="declaration.usd_offline" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
-                                    <tr><td>ZiG EFT</td><td class="text-right"><span t-field="declaration.zig_eft" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
-                                    <tr><td>ZiG Offline</td><td class="text-right"><span t-field="declaration.zig_offline" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
-                                    <tr><td>Vouchers Issued</td><td class="text-right"><span t-field="declaration.vouchers_issued" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
-                                    <tr><td>Vouchers Redeemed</td><td class="text-right"><span t-field="declaration.vouchers_redeemed" t-options='{"widget": "monetary", "display_currency": declaration.currency_usd}'/></td></tr>
+                                    <tr><td>USD EFT</td><td class="text-right">$<span t-esc="'{:,.2f}'.format(declaration.usd_eft or 0)"/></td></tr>
+                                    <tr><td>USD Offline</td><td class="text-right">$<span t-esc="'{:,.2f}'.format(declaration.usd_offline or 0)"/></td></tr>
+                                    <tr><td>ZiG EFT</td><td class="text-right">$<span t-esc="'{:,.2f}'.format(declaration.zig_eft or 0)"/></td></tr>
+                                    <tr><td>ZiG Offline</td><td class="text-right">$<span t-esc="'{:,.2f}'.format(declaration.zig_offline or 0)"/></td></tr>
+                                    <tr><td>Vouchers Issued</td><td class="text-right">$<span t-esc="'{:,.2f}'.format(declaration.vouchers_issued or 0)"/></td></tr>
+                                    <tr><td>Vouchers Redeemed</td><td class="text-right">$<span t-esc="'{:,.2f}'.format(declaration.vouchers_redeemed or 0)"/></td></tr>
                                 </table>
                             </div>
                         </div>
@@ -101,18 +106,18 @@
                                     <div class="col-8">
                                         <h5><span t-field="line.declaration_type_name"/></h5>
                                         <p><strong>Currency:</strong> <span t-field="line.currency_id.name"/> | 
-                                           <strong>Exchange Rate:</strong> <span t-field="line.exchange_rate" t-options='{"precision": 6}'/></p>
+                                           <strong>Exchange Rate:</strong> <span t-esc="'{:.6f}'.format(line.exchange_rate or 0)"/></p>
                                     </div>
                                     <div class="col-4 text-right">
                                         <p><strong>Amount:</strong> 
-                                            <t t-if="line.currency_id">
-                                                <span t-field="line.amount" t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
+                                            <t t-if="line.currency_id and line.currency_id.symbol">
+                                                <span t-esc="line.currency_id.symbol"/><span t-esc="'{:,.2f}'.format(line.amount or 0)"/>
                                             </t>
                                             <t t-else="">
-                                                <span t-field="line.amount" t-options='{"widget": "float", "precision": 2}'/>
+                                                <span t-esc="'{:,.2f}'.format(line.amount or 0)"/>
                                             </t>
                                         </p>
-                                        <p><strong>Amount USD:</strong> <span t-field="line.amount_usd" t-options='{"widget": "monetary", "display_currency": line.currency_usd}'/></p>
+                                        <p><strong>Amount USD:</strong> $<span t-esc="'{:,.2f}'.format(line.amount_usd or 0)"/></p>
                                     </div>
                                 </div>
 
@@ -140,20 +145,16 @@
                                                     <td t-if="line.related_is_cash"><span t-field="note.count"/></td>
                                                     <td><span t-field="note.currency_id.name"/></td>
                                                     <td t-attf-style="color: #{note.amount &lt; 0 and 'red' or 'black'};">
-                                                        <t t-if="note.currency_id">
-                                                            <span t-field="note.amount" t-options='{"widget": "monetary", "display_currency": note.currency_id}'/>
+                                                        <t t-if="note.currency_id and note.currency_id.symbol">
+                                                            <span t-esc="note.currency_id.symbol"/><span t-esc="'{:,.2f}'.format(abs(note.amount or 0))"/>
+                                                            <t t-if="note.amount &lt; 0">-</t>
                                                         </t>
                                                         <t t-else="">
-                                                            <span t-field="note.amount" t-options='{"widget": "float", "precision": 2}'/>
+                                                            <span t-esc="'{:,.2f}'.format(note.amount or 0)"/>
                                                         </t>
                                                     </td>
                                                     <td t-attf-style="color: #{note.amount_usd &lt; 0 and 'red' or 'black'};">
-                                                        <t t-if="note.currency_usd">
-                                                            <span t-field="note.amount_usd" t-options='{"widget": "monetary", "display_currency": note.currency_usd}'/>
-                                                        </t>
-                                                        <t t-else="">
-                                                            <span t-field="note.amount_usd" t-options='{"widget": "float", "precision": 2}'/>
-                                                        </t>
+                                                        <t t-if="note.amount_usd &lt; 0">-</t>$<span t-esc="'{:,.2f}'.format(abs(note.amount_usd or 0))"/>
                                                     </td>
                                                 </tr>
                                             </t>

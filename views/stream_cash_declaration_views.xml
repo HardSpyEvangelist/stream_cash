@@ -6,7 +6,7 @@
         <field name="name">stream_cash.declarations.list</field>
         <field name="model">stream_cash.declarations</field>
         <field name="arch" type="xml">
-            <list string="Declarations">
+            <list string="Declarations" delete="false">
                 <!-- Status shown first with color decoration -->
                 <field name="state"
                        decoration-info="state == 'Draft'"
@@ -93,64 +93,57 @@
         <field name="model">stream_cash.declarations</field>
         <field name="arch" type="xml">
             <form string="Declarations">
-                                <!-- Add this button to your form header section, right after the existing buttons -->
-                    <header>
-                        <!-- Your existing buttons -->
-                        <button name="action_open_type_selector"
-                            string="Add Declaration Line"
+                <header>
+                    <!-- Your existing buttons -->
+                    <button name="action_open_type_selector"
+                        string="Add Declaration Line"
+                        type="object"
+                        class="btn-primary"
+                        context="{'default_declaration_id': id}"
+                        invisible="state not in ['Draft']"
+                        groups="!stream_cash.group_streamcash_supervisor,!stream_cash.group_streamcash_manager"/>
+                    
+                    <button name="action_verify"
+                            string="Verify"
                             type="object"
                             class="btn-primary"
-                            context="{'default_declaration_id': id}"
-                            invisible="state not in ['Draft']"
-                            groups="!stream_cash.group_streamcash_supervisor,!stream_cash.group_streamcash_manager"/>
-                        
-                        <button name="action_verify"
-                                string="Verify"
-                                type="object"
-                                class="btn-primary"
-                                invisible="state != 'Draft'"
-                                groups="stream_cash.group_streamcash_supervisor"/>
-                        
-                        <button name="action_close"
-                                string="Close"
-                                type="object"
-                                class="btn-primary"
-                                invisible="state != 'Verified'"
-                                groups="stream_cash.group_streamcash_manager"/>
-                        
-                        <!-- NEW PRINT BUTTON -->
-                        <button name="%(action_cash_declaration_report)d"
-                                string="Print Declaration"
-                                type="action"
-                                class="btn-info"
-                                icon="fa-print"/>
-                        
-                        <!-- Your existing cancel/delete buttons -->
-                        <button name="action_cancel"
-                                string="Cancel"
-                                type="object"
-                                class="btn-warning"
-                                invisible="state in ['Cancelled', 'Deleted']"
-                                groups="stream_cash.group_streamcash_supervisor"
-                                confirm="Are you sure you want to cancel this declaration?"/>
-                        
-                        <button name="action_delete"
-                                string="Delete"
-                                type="object"
-                                class="btn-danger"
-                                invisible="state == 'Deleted'"
-                                groups="stream_cash.group_streamcash_manager"
-                                confirm="Are you sure you want to mark this declaration as deleted? This action cannot be undone."/>
-                        
-                        <button name="action_reset_to_draft"
-                                string="Reset to Draft"
-                                type="object"
-                                class="btn-secondary"
-                                invisible="state in ['Draft', 'Deleted']"
-                                groups="stream_cash.group_streamcash_manager"/>
-                        
-                        <field name="state" widget="statusbar" statusbar_visible="Draft,Verified,Closed"/>
-                    </header>
+                            invisible="state != 'Draft'"
+                            groups="stream_cash.group_streamcash_supervisor"/>
+                    
+                    <button name="action_close"
+                            string="Close"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'Verified'"
+                            groups="stream_cash.group_streamcash_manager"/>
+                    
+                    <!-- NEW PRINT BUTTON -->
+                    <button name="%(action_cash_declaration_report)d"
+                            string="Print Declaration"
+                            type="action"
+                            class="btn-info"
+                            icon="fa-print"/>
+                    
+                    <!-- Keep Cancel button -->
+                    <button name="action_cancel"
+                            string="Cancel"
+                            type="object"
+                            class="btn-warning"
+                            invisible="state in ['Cancelled', 'Deleted']"
+                            groups="stream_cash.group_streamcash_supervisor"
+                            confirm="Are you sure you want to cancel this declaration?"/>
+                    
+                    <!-- DELETE BUTTON COMPLETELY REMOVED -->
+                    
+                    <button name="action_reset_to_draft"
+                            string="Reset to Draft"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state in ['Draft', 'Deleted']"
+                            groups="stream_cash.group_streamcash_manager"/>
+                    
+                    <field name="state" widget="statusbar" statusbar_visible="Draft,Verified,Closed"/>
+                </header>
                 <sheet>
                     <!-- Add alert for cancelled/deleted records -->
                     <div class="alert alert-warning" role="alert" invisible="state != 'Cancelled'">
@@ -236,7 +229,7 @@
         </field>
     </record>
 
-    <!-- NEW Bulk Cancel Server Action -->
+    <!-- Bulk Cancel Server Action -->
     <record id="action_bulk_cancel_declarations" model="ir.actions.server">
         <field name="name">Bulk Cancel Declarations</field>
         <field name="model_id" ref="model_stream_cash_declarations"/>
@@ -248,7 +241,7 @@
         </field>
     </record>
 
-    <!-- NEW Bulk Delete Server Action -->
+    <!-- KEEP Bulk Delete Server Action (it's soft delete - changes state to 'Deleted') -->
     <record id="action_bulk_delete_declarations" model="ir.actions.server">
         <field name="name">Bulk Delete Declarations</field>
         <field name="model_id" ref="model_stream_cash_declarations"/>

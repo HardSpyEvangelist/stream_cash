@@ -57,42 +57,37 @@ class CashDeclarationWizard(models.TransientModel):
                         'count': 0,
                         'exchange_rate': self.currency_id.rate or 1.0
                     }))
-            
-            # Handle transaction types (flexible currency-based filtering)
-            transaction_types = self.env['stream_cash_transaction.type'].search([
-                ('declaration_type_id', '=', self.declaration_type_ids.id),
-                ('active', '=', True)
-            ], order='sequence, name')
-            
-            # Filter by currency if applicable_currency_id is set
-            if transaction_types:
-                # First, check if any transaction types have specific currency requirements
-                currency_specific_types = transaction_types.filtered('applicable_currency_id')
+            else:
+                # Handle transaction types (flexible currency-based filtering)
+                transaction_types = self.env['stream_cash_transaction.type'].search([
+                    ('declaration_type_id', '=', self.declaration_type_ids.id),
+                    ('active', '=', True)
+                ], order='sequence, name')
                 
-                if currency_specific_types:
-                    # If there are currency-specific types, only show those matching the selected currency
-                    # plus any that don't have a specific currency requirement
-                    transaction_types = transaction_types.filtered(
-                        lambda t: not t.applicable_currency_id or t.applicable_currency_id.id == self.currency_id.id
-                    )
-                # If no transaction types have currency requirements, show all of them
-            
-            if transaction_types:
-                for transaction_type in transaction_types:
-                    line_vals.append((0, 0, {
-                        'transaction_type_id': transaction_type.id,
-                        'amount': 0.0,
-                        'count': 0,
-                        'exchange_rate': self.currency_id.rate or 1.0
-                    }))
-            
-            # If neither cash nor transaction types exist, create one empty line
-            if not self.related_is_cash and not transaction_types:
-                line_vals.append((0, 0, {
-                    'amount': 0.0,
-                    'count': 0,
-                    'exchange_rate': self.currency_id.rate or 1.0
-                }))
+                # Filter by currency if applicable_currency_id is set
+                if transaction_types:
+                    # First, check if any transaction types have specific currency requirements
+                    currency_specific_types = transaction_types.filtered('applicable_currency_id')
+                    
+                    if currency_specific_types:
+                        # If there are currency-specific types, only show those matching the selected currency
+                        # plus any that don't have a specific currency requirement
+                        filtered_transaction_types = transaction_types.filtered(
+                            lambda t: not t.applicable_currency_id or t.applicable_currency_id.id == self.currency_id.id
+                        )
+                        # Use filtered types if any match, otherwise use all types
+                        transaction_types = filtered_transaction_types if filtered_transaction_types else transaction_types
+                    # If no transaction types have currency requirements, show all of them
+                
+                if transaction_types:
+                    for transaction_type in transaction_types:
+                        line_vals.append((0, 0, {
+                            'transaction_type_id': transaction_type.id,
+                            'amount': 0.0,
+                            'count': 0,
+                            'exchange_rate': self.currency_id.rate or 1.0
+                        }))
+                # If no transaction types found, leave line_vals empty so user can use "Add a line"
             
             self.line_ids = line_vals
 
