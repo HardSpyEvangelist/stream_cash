@@ -10,7 +10,7 @@
                     <sheet>
                         <group>
                             <group>
-                                <field name="denomination_value"/>
+                                <field name="denomination_value" />
                                 <field name="denomination_name"/>
                                 <field name="denomination_id"/>
                                 <field name="transaction_type_id" domain="[('declaration_type_id.name', '=', parent.declaration_type)]"/>

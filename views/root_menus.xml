@@ -25,5 +25,13 @@
               action="hr.open_view_employee_list_my"
               sequence="30"/>
 
+   <menuitem id="menu_stream_cash_customers"
+          name="Customers"
+          parent="menu_stream_cash_configuration"
+          action="base.action_partner_form"
+          sequence="40"
+          groups="group_streamcash_manager"/>
+
+
     
 </odoo>

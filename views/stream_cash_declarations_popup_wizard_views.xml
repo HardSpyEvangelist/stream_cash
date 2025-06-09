@@ -22,7 +22,8 @@
                         <page string="Declaration lines">
                              <field name="line_ids" nolabel="1">
                                 <list editable="bottom" delete="false">
-                                    <field name="partner_id" width="80px" force_save="1" column_invisible="parent.related_is_partner == False"/>
+                                    <field name="partner_id" width="80px" force_save="1" column_invisible="parent.related_is_partner == False" context="{'create': False}" options="{'no_create': True}"/>
+
                                     <field name="transaction_type_id" width="120px" force_save="1" 
                                             column_invisible="parent.related_is_cash == True or parent.related_is_partner == True"
                                             domain="[('declaration_type_id', '=', parent.declaration_type_ids)]"

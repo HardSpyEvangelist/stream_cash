@@ -10,6 +10,7 @@ class StreamCashDeclarationLine(models.Model):
     
     declaration_type_ids = fields.Many2one('declaration.type', string='Declaration Type', required=True, readonly=True)
     declaration_type_name = fields.Char(string="Declaration Type Name",related="declaration_type_ids.name",store=True )
+    declaration_type_state = fields.Selection(related="declaration_id.state")
     currency_id = fields.Many2one('res.currency', string="Currency")
     currency_usd = fields.Many2one('res.currency',string="Base Currency",help="This field ensures compatibility with monetary fields",default=lambda self: self.env.company.currency_id)
     company_id = fields.Many2one('res.company', string='Company', index=True, default=lambda self: self.env.company)
@@ -80,3 +81,5 @@ class StreamCashDeclarationLine(models.Model):
     #         vals['amount_usd'] = vals['amount'] * vals['exchange_rate']
     #
     #     return super(StreamCashDeclarationLine, self).create(vals)
+
+    
