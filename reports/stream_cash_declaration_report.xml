@@ -4,7 +4,7 @@
     <record id="action_cash_declaration_report" model="ir.actions.report">
         <field name="name">Cash Declaration Report</field>
         <field name="model">stream_cash.declarations</field>
-        <field name="report_type">qweb-pdf</field>
+        <field name="report_type">qweb-html</field>
         <field name="report_name">stream_cash.cash_declaration_report_template</field>
         <field name="report_file">stream_cash.cash_declaration_report_template</field>
         <field name="binding_model_id" ref="model_stream_cash_declarations"/>
@@ -14,11 +14,15 @@
 
     <!-- Report Template -->
     <template id="cash_declaration_report_template">
-        <t t-call="external_layout">
+        <t t-call="web.html_container">
+            <t t-set="head">
+                <meta charset="UTF-8"/>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+            </t>
             <t t-foreach="docs" t-as="declaration">
                 <div class="page">
                     <!-- Header -->
-                    <divstyle="border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px;">
+                    <div class="header" style="border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px;">
                         <div class="row">
                             <div class="col-6">
                                 <h2>Cash Declaration Report</h2>

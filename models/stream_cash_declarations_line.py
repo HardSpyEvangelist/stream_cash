@@ -26,6 +26,8 @@ class StreamCashDeclarationLine(models.Model):
     related_is_partner = fields.Boolean(related='declaration_type_ids.is_partner', store=True)
     related_is_negate = fields.Boolean(related='declaration_type_ids.is_negate', store=True)
 
+    
+
     @api.depends('declaration_notes_line_ids.amount')
     def _compute_total_amount(self):
         for rec in self:
